@@ -2,9 +2,14 @@
   "name": "halden-astro-theme",
   "type": "module",
   "version": "1.0.0",
-  "description": "Halden – a free, open-source Astro theme for healthcare and AI SaaS websites: 11 pages, Tailwind CSS, MDX blog, fast and accessible.",
+  "description": "Halden \u2013 a free, open-source Astro theme for healthcare and AI SaaS websites: 11 pages, Tailwind CSS, MDX blog, fast and accessible.",
   "license": "MIT",
   "author": "Wavespace",
+  "homepage": "https://github.com/WavespaceAgency/halden-astro-theme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WavespaceAgency/halden-astro-theme.git"
+  },
   "engines": {
     "node": ">=22.12.0"
   },
