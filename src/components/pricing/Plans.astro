@@ -1,0 +1,85 @@
+---
+import Container from "@/components/ui/Container.astro";
+import SectionIntro from "@/components/security/SectionIntro.astro";
+import { plans } from "@/config/pages/pricing";
+import { cn } from "@/lib/utils";
+
+/** Figma "Plans" (1440×1140): heading + three plan cards (the featured one is dark). Prices count up in view. */
+const s = plans;
+---
+
+<section class="py-20 lg:py-[120px]" aria-labelledby="plans-title">
+  <Container>
+    <SectionIntro
+      id="plans-title"
+      eyebrow={s.eyebrow}
+      title={s.title}
+      titleMuted={s.titleMuted}
+      description={s.description}
+      descriptionClass="max-w-[438px]"
+    />
+
+    <ul class="mt-12 grid gap-4 md:grid-cols-3 lg:mt-16 lg:min-h-[602px]">
+      {
+        s.items.map((plan) => {
+          const dark = plan.featured;
+          return (
+            <li class={cn("flex flex-col gap-8 rounded-card p-5 sm:p-6 lg:p-10", dark ? "bg-ink" : "bg-canvas-2")}>
+              <div class="flex flex-col gap-3">
+                <p class="flex items-center gap-2">
+                  <span class={cn("font-mono text-sm leading-[18px] tracking-[1.2px] uppercase", dark ? "text-sky" : "text-body")}>{plan.name}</span>
+                  {plan.badge && <span class="plan-badge rounded-full px-2.5 py-1 text-[13px] leading-[17px] font-medium text-ink">{plan.badge}</span>}
+                </p>
+                <p class="flex items-end gap-2">
+                  <span
+                    class={cn("text-h1 font-medium", dark ? "text-canvas" : "text-ink")}
+                    data-count={/\d/.test(plan.price) ? plan.price : undefined}
+                  >
+                    {plan.price}
+                  </span>
+                  {plan.period && <span class={cn("text-[13px] leading-[17px]", dark ? "text-[#dcebff]" : "text-muted")}>{plan.period}</span>}
+                </p>
+                <p class={cn("text-base leading-[26px]", dark ? "max-w-[281px] text-[#dcebff]" : "text-muted")} data-split="words">
+                  {plan.description}
+                </p>
+              </div>
+
+              <a
+                href={plan.cta.href}
+                class={cn(
+                  "inline-flex min-h-[52px] items-center justify-center rounded-full px-6 text-base leading-6 font-medium text-ink transition-[background-color,transform] duration-150 active:scale-[0.97]",
+                  dark ? "bg-surface hover:bg-sky-tint" : "border border-black/16 hover:bg-surface",
+                )}
+              >
+                {plan.cta.label}
+              </a>
+
+              <ul class="flex flex-col gap-3.5">
+                {plan.features.map((feature) => (
+                  <li class={cn("flex items-start gap-3 text-base leading-[26px]", dark ? "text-canvas" : "text-ink")}>
+                    <svg class="mt-[3px] size-5 shrink-0" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <rect width="20" height="20" rx="10" fill={dark ? "var(--sky)" : "#dcebff"} />
+                      <path d="M5.5 9.5 8.7 12.5 14.5 6.5" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <span data-split="words">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </Container>
+</section>
+
+<style>
+  /* "Most popular" pill: soft lime → mint → blue glow (Figma badge fills). */
+  .plan-badge {
+    background:
+      radial-gradient(60% 120% at 10% 50%, rgb(224 238 160) 0%, rgb(232 243 194 / 0.75) 50%, rgb(240 247 222 / 0) 100%),
+      radial-gradient(60% 140% at 50% 100%, rgb(156 225 222) 0%, rgb(190 234 230 / 0.7) 50%, rgb(221 243 239 / 0) 100%),
+      radial-gradient(50% 120% at 95% 30%, rgb(123 175 249 / 0.8) 0%, rgb(158 197 250 / 0.5) 45%, rgb(200 222 251 / 0) 100%),
+      #ecf7f1;
+  }
+</style>

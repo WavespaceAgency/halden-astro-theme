@@ -1,0 +1,19 @@
+---
+import { postPage } from "@/config/pages/blog";
+import type { Post } from "@/lib/content";
+import AuthorAvatar from "./AuthorAvatar.astro";
+
+interface Props {
+  post: Post;
+}
+/** "Written by" card at the end of a post. */
+const { author } = Astro.props.post.data;
+---
+
+<div class="flex flex-col gap-5 rounded-card bg-surface p-6 sm:flex-row sm:p-7">
+  <AuthorAvatar author={author} size={56} />
+  <div class="flex flex-col gap-1.5">
+    <p class="text-lg leading-[23px] font-medium text-ink-2">{postPage.writtenBy} {author.name}</p>
+    {author.bio && <p class="max-w-[569px] text-base leading-6 text-body">{author.bio}</p>}
+  </div>
+</div>

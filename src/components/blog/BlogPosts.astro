@@ -1,0 +1,110 @@
+---
+import Container from "@/components/ui/Container.astro";
+import { blogPage } from "@/config/pages/blog";
+import { buttonClasses } from "@/lib/button";
+import type { Post } from "@/lib/content";
+import PostCard from "./PostCard.astro";
+import Newsletter from "./Newsletter.astro";
+
+interface Props {
+  /** Every post, newest first. Featured posts are hidden under "All" (they are in the hero). */
+  posts: Post[];
+}
+const { posts } = Astro.props;
+const b = blogPage;
+const [all, ...categories] = b.categories;
+---
+
+<section class="bg-canvas pt-12 pb-20 lg:pt-16 lg:pb-[120px]" data-blog-posts data-page-size={b.pageSize}>
+  <Container class="flex flex-col gap-12">
+    <div class="flex flex-col gap-8">
+      <div class="flex flex-wrap gap-2" role="group" aria-label={b.filterLabel}>
+        {
+          [all, ...categories].map((category, i) => (
+            <button
+              type="button"
+              aria-pressed={i === 0 ? "true" : "false"}
+              data-filter={i === 0 ? "" : category}
+              class="min-h-[42px] rounded-pill border border-line px-[18px] text-[15px] leading-5 font-medium text-body transition-colors hover:border-ink/30 hover:text-ink aria-pressed:border-brand-bright aria-pressed:bg-brand-bright aria-pressed:text-white"
+            >
+              {category}
+            </button>
+          ))
+        }
+      </div>
+      <h2 class="text-[28px] leading-[1.3] font-medium tracking-[-0.02em] text-ink sm:text-[32px]">{b.latestTitle}</h2>
+    </div>
+
+    <ul class="grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3 lg:gap-y-14" data-posts-grid>
+      {
+        posts.map((post) => (
+          <li data-category={post.data.category} data-featured={post.data.featured ? "" : undefined} hidden={post.data.featured}>
+            <PostCard post={post} splitTitle />
+          </li>
+        ))
+      }
+    </ul>
+    <p class="hidden text-center text-body" data-posts-empty>{b.empty}</p>
+
+    <div class="flex justify-center" hidden data-load-more-wrap>
+      <button type="button" class={buttonClasses({ variant: "outline", size: "xl", className: "rounded-pill! border-ink-2/16! bg-transparent!" })} data-load-more>
+        {b.loadMore}
+      </button>
+    </div>
+
+    <Newsletter />
+  </Container>
+</section>
+
+<script>
+  import { reduceMotion } from "@/scripts/motion";
+
+  document.querySelectorAll<HTMLElement>("[data-blog-posts]").forEach((section) => {
+    const pageSize = Number(section.dataset.pageSize) || 6;
+    const buttons = Array.from(section.querySelectorAll<HTMLButtonElement>("[data-filter]"));
+    const items = Array.from(section.querySelectorAll<HTMLLIElement>("[data-posts-grid] > li"));
+    const moreWrap = section.querySelector<HTMLElement>("[data-load-more-wrap]")!;
+    const more = section.querySelector<HTMLButtonElement>("[data-load-more]")!;
+    const empty = section.querySelector<HTMLElement>("[data-posts-empty]")!;
+    let filter = "";
+    let shown = pageSize;
+
+    function render(animateFrom = 0) {
+      // "All" leaves out the featured posts (already in the hero); a category shows all its posts.
+      const matching = items.filter((li) => (filter ? li.dataset.category === filter : !("featured" in li.dataset)));
+      items.forEach((li) => (li.hidden = true));
+      matching.slice(0, shown).forEach((li, i) => {
+        li.hidden = false;
+        if (i >= animateFrom && !reduceMotion()) {
+          li.animate(
+            [
+              { opacity: 0, transform: "translateY(24px)" },
+              { opacity: 1, transform: "none" },
+            ],
+            { duration: 600, delay: (i - animateFrom) * 80, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "backwards" },
+          );
+        }
+      });
+      moreWrap.hidden = matching.length <= shown;
+      empty.classList.toggle("hidden", matching.length > 0);
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+        filter = button.dataset.filter ?? "";
+        shown = pageSize;
+        render(0);
+      });
+    });
+    more.addEventListener("click", () => {
+      const before = shown;
+      shown += pageSize;
+      render(before);
+      // Move focus to the first new post so keyboard users continue from there.
+      const visible = items.filter((li) => !li.hidden);
+      visible[before]?.querySelector("a")?.focus({ preventScroll: true });
+    });
+    render(Number.POSITIVE_INFINITY);
+  });
+</script>

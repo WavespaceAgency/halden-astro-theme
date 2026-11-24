@@ -1,0 +1,21 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import CtaBand from "@/components/sections/CtaBand.astro";
+import Faq from "@/components/sections/Faq.astro";
+import TextEffects from "@/components/ui/TextEffects.astro";
+import Compliance from "@/components/security/Compliance.astro";
+import PageHero from "@/components/security/PageHero.astro";
+import Privacy from "@/components/security/Privacy.astro";
+import Standards from "@/components/security/Standards.astro";
+import { faq, hero, meta } from "@/config/pages/security";
+---
+
+<BaseLayout title={meta.title} description={meta.description}>
+  <PageHero {...hero} />
+  <Standards />
+  <Privacy />
+  <Compliance />
+  <Faq content={faq} />
+  <CtaBand />
+  <TextEffects />
+</BaseLayout>

@@ -1,0 +1,9 @@
+---
+/** Links inside legal text. */
+interface Props {
+  href?: string;
+}
+const { href } = Astro.props;
+---
+
+<a href={href} class="font-medium text-brand underline decoration-brand/30 underline-offset-2 hover:decoration-brand"><slot /></a>

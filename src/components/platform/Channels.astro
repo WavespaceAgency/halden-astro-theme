@@ -1,0 +1,40 @@
+---
+import Container from "@/components/ui/Container.astro";
+import SectionHeading from "@/components/ui/SectionHeading.astro";
+import { channelIcons, channels } from "@/config/pages/platform";
+
+/** Channels: "One agent, every channel" – four coloured cards with a navy icon tile (Figma 1440×804). */
+---
+
+<section class="bg-surface py-20 lg:py-[120px]">
+  <Container>
+    <div data-fx-auto>
+      <SectionHeading
+        {...channels.heading}
+        align="center"
+        class="[&>p:first-child]:!mb-4"
+        descriptionClass="!mt-4 max-w-[484px] !text-muted"
+      />
+    </div>
+    <ul class="mt-12 grid gap-4 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4">
+      {
+        channels.items.map((item) => (
+          <li class="flex min-h-[230px] flex-col justify-between gap-14 rounded-card p-8 lg:min-h-[266px]" style={`background:${item.background}`}>
+            <svg class="size-12" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <rect width="48" height="48" rx="14" fill="#071A31" />
+              <path d={channelIcons[item.icon]} stroke={item.background} stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <div class="flex flex-col gap-2">
+              <h3 class="text-h3 font-medium text-ink" data-fx="chars">
+                {item.title}
+              </h3>
+              <p class="text-lead text-body" data-fx="words">
+                {item.description}
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
+</section>

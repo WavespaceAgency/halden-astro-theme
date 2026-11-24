@@ -1,0 +1,148 @@
+---
+/**
+ * Framer text effects for the Platform page (include once per page).
+ *   data-fx="chars"  each letter pops in (scale 0.1 → 1 with a small overshoot, 0.035s apart) – headings
+ *   data-fx="words"  each word un-blurs (8px → 0, 0.05s apart) – paragraphs
+ *   data-fx-load     start on page load instead of when the element scrolls into view
+ *   data-fx-manual   never start on scroll; another script sets data-fx-play (How it works job titles)
+ *   data-fx-auto     on a wrapper (e.g. around <SectionHeading>): its h1/h2 get "chars", the paragraph after it "words"
+ * The text is split in the browser; screen readers get the plain text (the animated copy is aria-hidden).
+ * Without JavaScript or with "reduce motion" the text is simply shown.
+ */
+---
+
+<style is:global>
+  .fx-word,
+  .fx-c,
+  .fx-w {
+    display: inline-block;
+  }
+  .fx-word {
+    white-space: nowrap;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html.js [data-fx]:not([data-fx-ready]),
+    html.js [data-fx-auto] :is(h1, h2, h1 ~ p, h2 ~ p):not([data-fx-ready]) {
+      opacity: 0;
+    }
+    [data-fx-ready]:not([data-fx-play]) .fx-c {
+      opacity: 0.001;
+      transform: scale(0.1);
+    }
+    [data-fx-ready]:not([data-fx-play]) .fx-w {
+      opacity: 0.001;
+      filter: blur(8px);
+    }
+    [data-fx-play] .fx-c {
+      animation: fx-pop 0.7s cubic-bezier(0.33, 1, 0.68, 1) both;
+      animation-delay: calc(var(--fx-d, 0.2s) + var(--i) * 0.035s);
+    }
+    [data-fx-play] .fx-w {
+      animation: fx-blur 0.45s ease-out both;
+      animation-delay: calc(var(--fx-d, 0.4s) + var(--i) * 0.05s);
+    }
+  }
+  @keyframes fx-pop {
+    0% {
+      opacity: 0.001;
+      transform: scale(0.1);
+    }
+    40% {
+      opacity: 1;
+    }
+    55% {
+      transform: scale(1.08);
+    }
+    80% {
+      transform: scale(0.99);
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes fx-blur {
+    from {
+      opacity: 0.001;
+      filter: blur(8px);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+    }
+  }
+</style>
+
+<script>
+  import { reduceMotion } from "@/scripts/motion";
+
+  function split(el: HTMLElement) {
+    const chars = el.dataset.fx === "chars";
+    const visual = el.cloneNode(true) as HTMLElement;
+    const walker = document.createTreeWalker(visual, NodeFilter.SHOW_TEXT);
+    const texts: Text[] = [];
+    while (walker.nextNode()) texts.push(walker.currentNode as Text);
+    let i = 0;
+    for (const node of texts) {
+      const frag = document.createDocumentFragment();
+      for (const part of (node.textContent ?? "").split(/(\s+)/)) {
+        if (!part) continue;
+        if (/^\s+$/.test(part)) {
+          // keep "\n" so whitespace-pre-line headings still break
+          frag.append(part.includes("\n") ? "\n" : " ");
+          continue;
+        }
+        const word = document.createElement("span");
+        if (chars) {
+          word.className = "fx-word";
+          for (const ch of part) {
+            const c = document.createElement("span");
+            c.className = "fx-c";
+            c.style.setProperty("--i", String(i++));
+            c.textContent = ch;
+            word.append(c);
+          }
+        } else {
+          word.className = "fx-w";
+          word.style.setProperty("--i", String(i++));
+          word.textContent = part;
+        }
+        frag.append(word);
+      }
+      node.replaceWith(frag);
+    }
+    const sr = document.createElement("span");
+    sr.className = "sr-only";
+    sr.textContent = (el.textContent ?? "").replace(/\s+/g, " ").trim();
+    const shown = document.createElement("span");
+    shown.setAttribute("aria-hidden", "true");
+    shown.append(...Array.from(visual.childNodes));
+    el.replaceChildren(sr, shown);
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-fx-auto]").forEach((wrap) => {
+    wrap.querySelectorAll<HTMLElement>("h1, h2").forEach((h) => (h.dataset.fx ??= "chars"));
+    wrap.querySelectorAll<HTMLElement>("h1 ~ p, h2 ~ p").forEach((p) => (p.dataset.fx ??= "words"));
+  });
+  const els = document.querySelectorAll<HTMLElement>("[data-fx]");
+  if (reduceMotion() || !("IntersectionObserver" in window)) {
+    els.forEach((el) => el.setAttribute("data-fx-ready", ""));
+  } else {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.setAttribute("data-fx-play", "");
+          io.unobserve(entry.target);
+        }
+      },
+      { rootMargin: "0px 0px -10% 0px", threshold: 0.3 },
+    );
+    els.forEach((el) => {
+      split(el);
+      el.setAttribute("data-fx-ready", "");
+      if (el.hasAttribute("data-fx-load")) el.setAttribute("data-fx-play", "");
+      else if (!el.hasAttribute("data-fx-manual")) io.observe(el);
+    });
+  }
+</script>

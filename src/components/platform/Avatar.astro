@@ -1,0 +1,29 @@
+---
+import { Image } from "astro:assets";
+import { getImage } from "@/lib/images";
+import { cn } from "@/lib/utils";
+
+interface Props {
+  /** Image path in src/assets/images (e.g. "/images/platform/avatar-maya.png"). */
+  src: string;
+  /** Rendered size in px (square). */
+  size: number;
+  class?: string;
+  /** Leave empty for decorative avatars next to a visible name. */
+  alt?: string;
+}
+
+/** Round avatar photo used in the product mockups and testimonials. */
+const { src, size, class: className, alt = "" } = Astro.props;
+---
+
+<Image
+  src={getImage(src)}
+  alt={alt}
+  width={size}
+  height={size}
+  densities={[1, 2]}
+  loading="lazy"
+  class={cn("shrink-0 rounded-full object-cover", className)}
+  style={`width:${size}px;height:${size}px`}
+/>

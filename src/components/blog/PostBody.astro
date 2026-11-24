@@ -1,0 +1,39 @@
+---
+import { postPage } from "@/config/pages/blog";
+import type { Post } from "@/lib/content";
+import Container from "@/components/ui/Container.astro";
+import TocSpy from "@/components/mdx/TocSpy.astro";
+import AuthorBox from "./AuthorBox.astro";
+import PostAside from "./PostAside.astro";
+
+interface Props {
+  post: Post;
+  url: string;
+  headings: { slug: string; text: string }[];
+}
+/** Article body: sticky aside (contents, share, author) + the MDX content, tags and author card. */
+const { post, url, headings } = Astro.props;
+const { tags } = post.data;
+---
+
+<section class="pt-10 pb-16 lg:pt-20 lg:pb-24">
+  <Container class="flex flex-col gap-10 lg:flex-row lg:gap-24">
+    <PostAside post={post} url={url} headings={headings} />
+    <div class="flex min-w-0 flex-col gap-6 lg:w-[760px]">
+      <div class="flex flex-col gap-6">
+        <slot />
+      </div>
+      {
+        tags.length > 0 && (
+          <ul class="flex flex-wrap gap-2 pt-4" aria-label={postPage.tagsLabel}>
+            {tags.map((tag) => (
+              <li class="flex min-h-8 items-center rounded-pill border border-ink-2/12 px-3.5 text-sm leading-[18px] font-medium text-body">{tag}</li>
+            ))}
+          </ul>
+        )
+      }
+      <AuthorBox post={post} />
+    </div>
+  </Container>
+  <TocSpy />
+</section>

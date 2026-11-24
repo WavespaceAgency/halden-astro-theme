@@ -1,0 +1,247 @@
+---
+import { buttonClasses } from "@/lib/button";
+import { privacy, type StatusTone } from "@/config/pages/security";
+import SectionIntro from "./SectionIntro.astro";
+
+/**
+ * Figma "Section" 660:11184 (1440×1182, purple gradient): heading, four tabs
+ * (Protect / Limit / Record / Review) that swap the text and the status card over
+ * the glass fan, then the stats row. Tabs are keyboard usable (arrow keys, Home, End).
+ */
+const p = privacy;
+/** Glass blades of the fan: rotated around their bottom centre, 12° apart. */
+const blades = Array.from({ length: 15 }, (_, i) => -84 + i * 12);
+const statusColor: Record<StatusTone, string> = { ink: "text-ink-2", blue: "text-brand-text", red: "text-[#b03f44]" };
+const lines = (text: string) => text.split("\n");
+---
+
+<section class="privacy relative overflow-hidden rounded-[24px] lg:rounded-[32px]" aria-labelledby="privacy-title" data-privacy>
+  <div class="mx-auto max-w-[1200px] px-4 pt-16 pb-16 sm:px-6 lg:px-10 lg:pt-[120px] lg:pb-[112px]">
+    <div class="border-l border-canvas/24">
+      <SectionIntro
+        id="privacy-title"
+        eyebrow={p.eyebrow}
+        title={p.title}
+        titleAccent={p.titleAccent}
+        theme="light"
+        class="mx-auto max-w-[731px] px-4 lg:px-0"
+      />
+
+      <!-- Tabs + text + illustration -->
+      <div class="mt-12 flex flex-col gap-12 lg:mt-0 lg:flex-row lg:items-center lg:gap-10 lg:pt-[88px]">
+        <div class="flex flex-col gap-10 lg:h-[450px] lg:w-[334px] lg:shrink-0 lg:gap-[75px]">
+          <div role="tablist" aria-label={p.tabsLabel} class="-ml-px flex flex-col gap-0.5 lg:w-[321px]" data-tabs>
+            {
+              p.steps.map((step, i) => (
+                <button
+                  type="button"
+                  role="tab"
+                  id={`privacy-tab-${i}`}
+                  aria-controls={`privacy-panel-${i}`}
+                  aria-selected={i === 0 ? "true" : "false"}
+                  tabindex={i === 0 ? 0 : -1}
+                  class="privacy-tab flex h-11 focus-visible:outline-canvas items-center gap-3.5 border-l-[3px] pl-[18px] text-left text-xs leading-4 font-medium tracking-[0.02em] uppercase lg:h-9"
+                >
+                  <span>{String(i + 1).padStart(2, "0")}</span>
+                  <span>{step.tab}</span>
+                </button>
+              ))
+            }
+          </div>
+
+          <div class="grid pl-5 lg:w-[341px]">
+            {
+              p.steps.map((step, i) => (
+                <div
+                  role="tabpanel"
+                  id={`privacy-panel-${i}`}
+                  aria-labelledby={`privacy-tab-${i}`}
+                  class="privacy-panel col-start-1 row-start-1 flex flex-col items-start gap-7"
+                  data-active={i === 0 ? "" : undefined}
+                >
+                  <div class="flex flex-col gap-[11px]">
+                    <h3 class="text-h3 font-medium text-canvas">{lines(step.title).map((line, j) => (j ? [" ", <br />, line] : line))}</h3>
+                    <p class="max-w-[321px] text-base leading-[26px] text-canvas">{step.text}</p>
+                  </div>
+                  <a href={p.cta.href} class={buttonClasses({ variant: "light", className: "bg-canvas focus-visible:outline-canvas" })}>
+                    {p.cta.label}
+                  </a>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+
+        <!-- Illustration: glass fan + status card (scaled down on small screens) -->
+        <div class="privacy-art relative lg:h-[380px] lg:flex-1" aria-hidden="true">
+          <div class="absolute top-0 left-1/2 h-[380px] w-[600px] origin-top lg:w-[560px] -translate-x-1/2 scale-(--s)">
+            <div class="absolute inset-x-0 top-[104px] h-[276px] overflow-hidden">
+              {blades.map((deg) => <span class="privacy-blade" style={`--r:${deg}deg`} />)}
+            </div>
+            <span class="privacy-stem absolute top-[104px] left-[279px] h-[270px] w-0.5"></span>
+
+            <div class="absolute top-0 left-[308px] grid w-[292px]">
+              {
+                p.steps.map((step, i) => (
+                  <div
+                    class="privacy-card col-start-1 row-start-1 rounded-card border border-canvas bg-canvas px-[18px] pt-[18px] pb-4 shadow-[0_18px_44px_0_rgb(50_25_4/0.12),0_1px_2px_0_rgb(50_25_4/0.05)]"
+                    data-card={i}
+                    data-active={i === 0 ? "" : undefined}
+                  >
+                    <div class="flex items-center justify-between">
+                      <p class="flex items-center gap-2.5">
+                        <span class="h-6 w-[3px] bg-brand-bright" />
+                        <span class="text-h4 leading-6 font-medium tracking-[-0.015em] text-ink">{step.card.title}</span>
+                      </p>
+                      {step.card.number && <span class="text-[11px] font-medium text-muted">{step.card.number}</span>}
+                    </div>
+                    <ul class="flex flex-col gap-1.5 pt-3.5">
+                      {step.card.rows.map((row) => (
+                        <li class="flex h-9 items-center justify-between gap-3 rounded-lg bg-canvas-2 px-2.5">
+                          <span class="flex items-center gap-2 text-[13px] leading-[17px] text-ink">
+                            <svg class="size-[18px] shrink-0" viewBox="0 0 18 18" fill="none">
+                              <circle cx="9" cy="9" r="9" fill="#6bb1ff" />
+                              <path d="M6.083 9.208 7.958 11.083 11.917 7.125" stroke="var(--canvas)" stroke-width="1.417" />
+                            </svg>
+                            {row.label}
+                          </span>
+                          <span class={`text-[11px] leading-[14px] font-medium tracking-[0.02em] ${statusColor[row.tone]}`}>{row.status}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="pt-14 pl-5 text-sm leading-[18px] font-medium tracking-[0.02em] text-canvas uppercase lg:pt-[94px]">{p.note}</p>
+
+      <ul class="mt-7 grid border-y border-canvas/24 lg:grid-cols-3">
+        {
+          p.stats.map((stat) => (
+            <li class="flex items-center gap-[22px] border-canvas/24 px-5 py-6 not-last:border-b sm:px-8 lg:py-[30px] lg:not-last:border-r lg:not-last:border-b-0 lg:nth-2:mr-[51px]">
+              <p class="text-[44px] leading-[1.1] font-medium tracking-[-0.03em] text-canvas" data-count={/\d/.test(stat.value) ? stat.value : undefined}>
+                {stat.value}
+              </p>
+              <p class="text-[15px] leading-[21px] whitespace-pre-line text-canvas">{stat.label}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .privacy {
+    background: linear-gradient(180deg, #6650aa 0%, #4b50bb 50%, #2c4ebd 100%);
+  }
+
+  /* Tabs */
+  .privacy-tab {
+    border-color: rgb(252 251 248 / 0.52);
+    color: var(--sky);
+    transition:
+      color 0.3s,
+      border-color 0.3s;
+  }
+  .privacy-tab:hover {
+    color: var(--canvas);
+  }
+  .privacy-tab[aria-selected="true"] {
+    border-color: var(--canvas);
+    color: var(--canvas);
+  }
+
+  /* Panels and cards: the active one fades up 8px (Framer). All of them share one grid cell,
+     so the height never jumps; hidden ones are invisible to screen readers and keyboard too. */
+  .privacy-panel,
+  .privacy-card {
+    transition:
+      opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0.45s;
+  }
+  .privacy-panel:not([data-active]),
+  .privacy-card:not([data-active]) {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+  }
+  .privacy-panel[data-active],
+  .privacy-card[data-active] {
+    transition-delay: 0.08s, 0.08s, 0s;
+  }
+
+  /* Illustration scale */
+  .privacy-art {
+    --s: 0.5;
+    height: calc(380px * var(--s));
+  }
+  @media (min-width: 375px) {
+    .privacy-art {
+      --s: 0.58;
+    }
+  }
+  @media (min-width: 640px) {
+    .privacy-art {
+      --s: 0.85;
+    }
+  }
+  @media (min-width: 1024px) {
+    .privacy-art {
+      --s: 1;
+    }
+  }
+
+  .privacy-blade {
+    position: absolute;
+    top: 10px;
+    left: 205px;
+    width: 152px;
+    height: 264px;
+    border: 1px solid var(--sky);
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(200 222 251 / 0.28));
+    box-shadow: -2px 0 6px 0 rgb(19 44 52 / 0.05);
+    transform-origin: 50% 100%;
+    transform: rotate(var(--r));
+  }
+  .privacy-stem {
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(200 222 251 / 0.28));
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-privacy]").forEach((root) => {
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const panels = Array.from(root.querySelectorAll<HTMLElement>('[role="tabpanel"]'));
+    const cards = Array.from(root.querySelectorAll<HTMLElement>("[data-card]"));
+
+    const select = (index: number, focus = false) => {
+      tabs.forEach((tab, i) => {
+        const on = i === index;
+        tab.setAttribute("aria-selected", String(on));
+        tab.tabIndex = on ? 0 : -1;
+        panels[i].toggleAttribute("data-active", on);
+        cards[i]?.toggleAttribute("data-active", on);
+      });
+      if (focus) tabs[index].focus();
+    };
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => select(i));
+      tab.addEventListener("keydown", (e) => {
+        const last = tabs.length - 1;
+        const next = { ArrowDown: i + 1, ArrowRight: i + 1, ArrowUp: i - 1, ArrowLeft: i - 1, Home: 0, End: last }[e.key];
+        if (next === undefined) return;
+        e.preventDefault();
+        select((next + tabs.length) % tabs.length, true);
+      });
+    });
+  });
+</script>

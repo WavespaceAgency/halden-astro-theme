@@ -1,0 +1,59 @@
+---
+import { Image } from "astro:assets";
+import Container from "@/components/ui/Container.astro";
+import Eyebrow from "@/components/ui/Eyebrow.astro";
+import SplitText from "./SplitText.astro";
+import { story } from "@/config/pages/about";
+import { getImage } from "@/lib/images";
+
+/** "Our story" (Figma "Story", 1440×996): eyebrow left, three paragraphs right, two photos below. */
+const [wide, tall] = story.photos;
+---
+
+<section class="pt-16 pb-6 sm:pt-24 lg:pt-[140px] lg:pb-11">
+  <Container>
+    <div class="grid gap-6 md:grid-cols-2 md:gap-12 lg:gap-24">
+      <Eyebrow {...story.eyebrow} class="self-start" />
+      <div class="flex flex-col gap-5 text-[17px] leading-[28px] sm:text-lg sm:leading-[30px]">
+        {story.paragraphs.map((text) => <SplitText text={text} class="text-body" />)}
+        <SplitText text={story.highlight} class="font-medium text-ink-2" />
+      </div>
+    </div>
+
+    <div class="mt-12 grid gap-4 sm:grid-cols-[820fr_412fr] lg:mt-[72px]">
+      <div class="story-photo relative aspect-[358/340] overflow-hidden rounded-xl bg-surface sm:aspect-auto sm:h-[clamp(300px,32vw,460px)]">
+        <Image
+          src={getImage(wide.src)}
+          alt={wide.alt}
+          widths={[640, 960, 1280]}
+          sizes="(min-width: 1440px) 1106px, (min-width: 640px) 77vw, 100vw"
+          class="story-photo-wide absolute inset-0 size-full object-cover"
+          loading="lazy"
+        />
+      </div>
+      <div class="relative aspect-[358/400] overflow-hidden rounded-xl sm:aspect-auto sm:h-[clamp(300px,32vw,460px)]">
+        <Image
+          src={getImage(tall.src)}
+          alt={tall.alt}
+          widths={[400, 750]}
+          sizes="(min-width: 1440px) 412px, (min-width: 640px) 33vw, 100vw"
+          class="absolute inset-0 size-full object-cover object-[50%_10%]"
+          loading="lazy"
+        />
+      </div>
+    </div>
+  </Container>
+</section>
+
+<style>
+  /* Figma crops the wide photo tighter (image 1106×829 placed at -143,-25 in an 820×460 frame). */
+  @media (min-width: 1024px) {
+    .story-photo-wide {
+      inset: -5.4% auto auto -17.4%;
+      width: 134.9%;
+      height: auto;
+      max-width: none;
+      aspect-ratio: 1106 / 829;
+    }
+  }
+</style>

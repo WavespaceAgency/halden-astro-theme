@@ -1,0 +1,29 @@
+---
+import Container from "@/components/ui/Container.astro";
+import { compliance } from "@/config/pages/security";
+import SectionIntro from "./SectionIntro.astro";
+
+/** Figma "Compliance" (1440×1006): heading + six numbered control cards. */
+const c = compliance;
+---
+
+<section id={c.id} class="py-20 lg:py-[120px]" aria-labelledby="compliance-title">
+  <Container>
+    <SectionIntro id="compliance-title" eyebrow={c.eyebrow} title={c.title} titleMuted={c.titleMuted} description={c.description} />
+    <ol class="mt-12 grid gap-4 md:grid-cols-2 lg:mt-16 lg:grid-cols-3">
+      {
+        c.items.map((item, i) => (
+          <li class="flex flex-col gap-8 rounded-[20px] bg-canvas-2 p-6 sm:p-8 lg:min-h-[240px] lg:gap-12">
+            <span class="flex size-11 items-center justify-center rounded-full bg-sky font-mono text-[11px] text-ink" aria-hidden="true">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <div class="flex flex-col gap-2">
+              <h3 class="text-h4 leading-6 font-medium tracking-[-0.015em] text-ink" data-split="words">{item.title}</h3>
+              <p class="text-base leading-[26px] text-muted" data-split="words">{item.text}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </Container>
+</section>

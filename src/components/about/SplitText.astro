@@ -1,0 +1,175 @@
+---
+/**
+ * Framer-style text effect, split at build time (no layout shift):
+ *   mode="chars"  each letter pops in (scale 0.1 → 1 with a small overshoot, 0.03s apart) – headings
+ *   mode="words"  each word un-blurs and rises 12px (0.03s apart) – paragraphs
+ * trigger="load" starts on page load, "view" when the element scrolls into view.
+ * Screen readers get the plain text; the animated copy is aria-hidden.
+ * Without JavaScript or with "reduce motion" the text is simply shown.
+ */
+import type { HTMLTag } from "astro/types";
+
+export interface SplitPart {
+  text: string;
+  class?: string;
+  /** Start this part on a new line (desktop: always; set `breakClass` to control when). */
+  break?: boolean;
+}
+
+interface Props {
+  as?: HTMLTag;
+  /** Plain text, or parts with their own classes (two-tone headings). */
+  text: string | SplitPart[];
+  mode?: "chars" | "words";
+  trigger?: "load" | "view";
+  /** Start delay in seconds. */
+  delay?: number;
+  /** Seconds between letters / words. */
+  stagger?: number;
+  /** Classes for the <br> before a part with `break` (e.g. "hidden sm:block"). */
+  breakClass?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  as: Tag = "p",
+  text,
+  mode = "words",
+  trigger = "view",
+  delay = 0,
+  stagger = 0.03,
+  breakClass,
+  class: className,
+  ...attrs
+} = Astro.props;
+
+const parts: SplitPart[] = typeof text === "string" ? [{ text }] : text;
+const plain = parts.map((p) => p.text).join(" ").replace(/\s+/g, " ").trim();
+
+let index = 0;
+const rendered = parts.map((part) => ({
+  ...part,
+  words: part.text
+    .trim()
+    .split(/\s+/)
+    .map((word) => ({
+      word,
+      chars: mode === "chars" ? [...word].map((ch) => ({ ch, i: index++ })) : [],
+      i: mode === "words" ? index++ : 0,
+    })),
+}));
+---
+
+<Tag class={className} data-about-split={mode} data-trigger={trigger} style={`--d:${delay}s;--s:${stagger}s`} {...attrs}>
+  <span class="sr-only">{plain}</span>
+  <span aria-hidden="true">
+    {
+      rendered.map((part, p) => (
+        <Fragment>
+          {part.break ? <br class={breakClass} /> : p > 0 ? " " : null}
+          <span class={part.class}>
+            {part.words.map((w, wi) => (
+              <Fragment>
+                {wi > 0 && " "}
+                {mode === "chars" ? (
+                  <span class="ab-word">
+                    {w.chars.map((c) => (
+                      <span class="ab-c" style={`--i:${c.i}`}>
+                        {c.ch}
+                      </span>
+                    ))}
+                  </span>
+                ) : (
+                  <span class="ab-w" style={`--i:${w.i}`}>
+                    {w.word}
+                  </span>
+                )}
+              </Fragment>
+            ))}
+          </span>
+        </Fragment>
+      ))
+    }
+  </span>
+</Tag>
+
+<style is:global>
+  .ab-word,
+  .ab-c,
+  .ab-w {
+    display: inline-block;
+  }
+  .ab-word {
+    white-space: nowrap;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html.js [data-about-split] .ab-c {
+      opacity: 0.001;
+      transform: scale(0.1);
+    }
+    html.js [data-about-split] .ab-w {
+      opacity: 0.001;
+      filter: blur(8px);
+      transform: translateY(12px);
+    }
+    html.js [data-about-split][data-in] .ab-c {
+      animation: ab-pop 0.55s cubic-bezier(0.33, 1, 0.68, 1) both;
+      animation-delay: calc(var(--d) + var(--i) * var(--s));
+    }
+    html.js [data-about-split][data-in] .ab-w {
+      animation: ab-blur 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: calc(var(--d) + var(--i) * var(--s));
+    }
+  }
+  @keyframes ab-pop {
+    0% {
+      opacity: 0.001;
+      transform: scale(0.1);
+    }
+    45% {
+      opacity: 1;
+      transform: scale(1.08);
+    }
+    75% {
+      transform: scale(0.99);
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes ab-blur {
+    from {
+      opacity: 0.001;
+      filter: blur(8px);
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      filter: none;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  const els = document.querySelectorAll<HTMLElement>("[data-about-split]:not([data-in])");
+  const io =
+    "IntersectionObserver" in window
+      ? new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (!e.isIntersecting) continue;
+              (e.target as HTMLElement).setAttribute("data-in", "");
+              io?.unobserve(e.target);
+            }
+          },
+          { rootMargin: "0px 0px -10% 0px", threshold: 0.2 },
+        )
+      : null;
+  els.forEach((el) => {
+    if (el.dataset.trigger === "load" || !io) el.setAttribute("data-in", "");
+    else io.observe(el);
+  });
+</script>

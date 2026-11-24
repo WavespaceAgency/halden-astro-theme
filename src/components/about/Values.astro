@@ -1,0 +1,29 @@
+---
+import Container from "@/components/ui/Container.astro";
+import SectionHeading from "@/components/ui/SectionHeading.astro";
+import { values } from "@/config/pages/about";
+
+/** "Our values" (Figma "Our values", 1440×687): heading + four cards with an icon tile. */
+---
+
+<section class="py-20 sm:py-24 lg:py-[140px]">
+  <Container>
+    <SectionHeading eyebrow={values.eyebrow} title={values.title} titleMuted={values.titleMuted} class="[&>p]:mb-4" />
+    <ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:mt-14 lg:grid-cols-4">
+      {
+        values.items.map((item) => (
+          <li class="flex min-h-[200px] flex-col justify-between gap-14 rounded-card border border-ink-2/10 bg-surface p-5 sm:p-7 lg:min-h-[248px]">
+            <svg class="size-12 shrink-0" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <rect width="48" height="48" rx="14" fill={item.tile} />
+              <path d={item.icon} stroke="#0c1a2f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <div>
+              <h3 class="text-[22px] leading-[1.2] font-medium tracking-[-0.015em] text-ink-2">{item.title}</h3>
+              <p class="mt-1 text-base leading-[26px] text-body">{item.text}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
+</section>

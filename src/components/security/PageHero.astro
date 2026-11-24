@@ -1,0 +1,60 @@
+---
+import { Image } from "astro:assets";
+import Container from "@/components/ui/Container.astro";
+import { getImage } from "@/lib/images";
+import { cn } from "@/lib/utils";
+
+/**
+ * Page hero for the Security and Pricing pages (Figma "Hero", 1376×600 photo card under the header):
+ * dark photo with a teal overlay, centred 64px heading, description and one button.
+ */
+interface Props {
+  title: string;
+  description: string;
+  cta: { label: string; href: string };
+  image: string;
+  /** Max width of the description (the Figma text boxes differ per page). */
+  descriptionClass?: string;
+}
+
+const { title, description, cta, image, descriptionClass } = Astro.props;
+const lines = title.split("\n");
+---
+
+<section class="pb-6 lg:pb-8" aria-labelledby="page-hero-title">
+  <Container size="wide" class="px-4 sm:px-6">
+    <div
+      class="relative isolate flex min-h-[360px] items-center justify-center overflow-hidden rounded-card px-5 py-12 sm:min-h-[460px] sm:px-10 lg:h-[600px] lg:py-0"
+    >
+      <Image
+        src={getImage(image)}
+        alt=""
+        widths={[640, 1024, 1376, 1792]}
+        sizes="(min-width: 1440px) 1376px, calc(100vw - 32px)"
+        loading="eager"
+        fetchpriority="high"
+        class="absolute inset-0 -z-20 size-full object-cover"
+      />
+      <div class="page-hero-overlay absolute inset-x-0 top-0 -z-10 h-[160%]" aria-hidden="true"></div>
+
+      <div class="flex w-full max-w-[760px] flex-col items-center text-center">
+        <h1 id="page-hero-title" class="text-display font-medium text-white" data-split="chars">
+          {lines.map((line, i) => (i ? [" ", <br />, line] : line))}
+        </h1>
+        <p class={cn("mt-3 max-w-[574px] text-lead text-white/85", descriptionClass)} data-split="words">{description}</p>
+        <a
+          href={cta.href}
+          class="mt-8 inline-flex min-h-[52px] items-center justify-center rounded-[22px] bg-brand px-6 text-base leading-6 font-medium text-canvas shadow-[0_0_24px_0_rgb(44_103_246/0.45)] transition-[background-color,transform] duration-150 hover:bg-brand-hover active:scale-[0.97]"
+        >
+          {cta.label}
+        </a>
+      </div>
+    </div>
+  </Container>
+</section>
+
+<style>
+  .page-hero-overlay {
+    background: linear-gradient(180deg, rgb(9 20 20 / 0.62) 0%, rgb(19 44 52 / 0.35) 55%, rgb(38 75 81 / 0.38) 100%);
+  }
+</style>

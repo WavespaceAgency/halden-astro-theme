@@ -1,0 +1,22 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import CtaBand from "@/components/sections/CtaBand.astro";
+import Faq from "@/components/sections/Faq.astro";
+import TextEffects from "@/components/ui/TextEffects.astro";
+import Compare from "@/components/pricing/Compare.astro";
+import Included from "@/components/pricing/Included.astro";
+import Plans from "@/components/pricing/Plans.astro";
+import PageHero from "@/components/security/PageHero.astro";
+import { faq, hero, meta } from "@/config/pages/pricing";
+---
+
+<BaseLayout title={meta.title} description={meta.description}>
+  <PageHero {...hero} descriptionClass="max-w-[474px]" />
+  <Plans />
+  <Compare />
+  <Included />
+  <!-- Figma: the pricing FAQ sits on the page colour, not the beige band. -->
+  <Faq content={faq} class="bg-canvas" />
+  <CtaBand />
+  <TextEffects />
+</BaseLayout>

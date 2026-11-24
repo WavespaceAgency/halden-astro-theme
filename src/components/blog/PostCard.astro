@@ -1,0 +1,53 @@
+---
+import { Image } from "astro:assets";
+import type { HTMLAttributes } from "astro/types";
+import type { Post } from "@/lib/content";
+import { cn } from "@/lib/utils";
+import PostMeta from "./PostMeta.astro";
+
+interface Props extends HTMLAttributes<"article"> {
+  post: Post;
+  /** "grid" = 270px image (blog grid, related posts). "featured" / "featured-tall" = the two hero cards. */
+  variant?: "grid" | "featured" | "featured-tall";
+  /** Load the image early (cards above the fold). */
+  eager?: boolean;
+  /** Animate the title letter by letter (hero cards). */
+  splitTitle?: boolean;
+}
+
+/** Blog post card: cover, meta, title, excerpt. The whole card is one link. */
+const { post, variant = "grid", eager = false, splitTitle = false, class: className, ...attrs } = Astro.props;
+const { data } = post;
+/** Hero cards sit right under the page h1, so they use h2; grid cards sit under a section h2. */
+const Heading = variant === "grid" ? "h3" : "h2";
+const image = {
+  grid: "aspect-[395/270] rounded-lg",
+  featured: "aspect-[392/248] rounded-xl",
+  "featured-tall": "aspect-[392/248] rounded-xl md:aspect-[392/420] md:rounded-[20px]",
+}[variant];
+---
+
+<article class={cn("group relative flex flex-col", className)} {...attrs}>
+  <div class={cn("overflow-hidden bg-canvas-2", image)}>
+    <Image
+      src={data.image}
+      alt={data.imageAlt}
+      widths={[400, 600, 800]}
+      sizes="(min-width: 1280px) 400px, (min-width: 768px) 50vw, 100vw"
+      class="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+      loading={eager ? "eager" : "lazy"}
+      fetchpriority={eager ? "high" : undefined}
+    />
+  </div>
+  <div class={cn("flex flex-col gap-4", variant === "featured-tall" ? "mt-8 md:mt-[34px]" : "mt-8")}>
+    <PostMeta post={post} />
+    <div class="flex flex-col gap-[7px]">
+      <Heading class="text-[22px] leading-[1.22] font-medium tracking-[-0.015em] text-pretty text-ink-2 sm:text-2xl">
+        <a href={`/blog/${post.id}`} class="rounded-sm after:absolute after:inset-0 after:content-['']">
+          <span data-split={splitTitle ? "chars" : undefined}>{data.title}</span>
+        </a>
+      </Heading>
+      <p class={cn("text-base leading-[26px] text-body", variant === "grid" && "max-w-[372px]")}>{data.excerpt}</p>
+    </div>
+  </div>
+</article>

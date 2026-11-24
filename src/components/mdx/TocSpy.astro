@@ -1,0 +1,42 @@
+---
+/**
+ * Highlights the "On this page" / "Contents" link of the section in view.
+ * Mark each link with data-toc-link and href="#section-id"; the active one gets
+ * aria-current="location" (style it with aria-[current=location]:…).
+ * Include once per page.
+ */
+---
+
+<script>
+  function initTocSpy() {
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("[data-toc-link]"));
+    const targets = links
+      .map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))))
+      .filter((el): el is HTMLElement => !!el);
+    if (!targets.length) return;
+
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const line = window.innerHeight * 0.3;
+      let active = targets[0];
+      for (const t of targets) if (t.getBoundingClientRect().top <= line) active = t;
+      // At the very bottom of the page, the last section wins.
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) active = targets[targets.length - 1];
+      for (const link of links) {
+        if (link.hash === `#${active.id}`) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+      }
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    update();
+  }
+  initTocSpy();
+</script>

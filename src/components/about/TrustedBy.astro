@@ -1,0 +1,25 @@
+---
+import Container from "@/components/ui/Container.astro";
+import Eyebrow from "@/components/ui/Eyebrow.astro";
+import { trustedBy } from "@/config/pages/about";
+
+/** "Trusted by clinic teams" (Figma "Trusted by", 1440×468): twelve coloured name tiles. */
+---
+
+<section class="py-16 sm:py-24 lg:py-[120px]">
+  <Container class="flex flex-col items-center">
+    <Eyebrow {...trustedBy.eyebrow} />
+    <ul class="mt-8 grid w-full grid-cols-2 gap-4 sm:grid-cols-3 lg:mt-10 lg:grid-cols-6">
+      {
+        trustedBy.clinics.map((clinic) => (
+          <li
+            class:list={["flex h-[72px] items-center justify-center rounded-panel px-3 text-center text-base leading-5 font-semibold tracking-[-0.01em]", clinic.dark ? "text-ink-2" : "text-body"]}
+            style={`background:${clinic.bg}`}
+          >
+            {clinic.name}
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
+</section>

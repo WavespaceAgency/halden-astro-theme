@@ -1,0 +1,20 @@
+---
+import type { Post } from "@/lib/content";
+import { formatDate } from "@/lib/content";
+import AuthorAvatar from "./AuthorAvatar.astro";
+
+interface Props {
+  post: Post;
+}
+/** Author avatar · name · date · reading time (Figma "Meta"). */
+const { data } = Astro.props.post;
+---
+
+<p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm leading-[18px] text-muted">
+  <AuthorAvatar author={data.author} />
+  <span class="font-medium text-ink">{data.author.name}</span>
+  <span aria-hidden="true">·</span>
+  <time datetime={data.date}>{formatDate(data.date)}</time>
+  <span aria-hidden="true">·</span>
+  <span>{data.readingTime}</span>
+</p>

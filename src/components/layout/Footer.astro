@@ -1,0 +1,82 @@
+---
+import LogoMark from "@/components/ui/LogoMark.astro";
+import { siteConfig } from "@/config/site";
+import { isExternal } from "@/lib/utils";
+
+const { columns, copyright, credit } = siteConfig.footer;
+const linkClass = "flex w-fit min-h-11 items-center text-[17px] leading-[22px] text-ink-2 transition-colors hover:text-brand md:min-h-0";
+---
+
+<footer class="relative overflow-hidden bg-surface">
+  <!-- Link columns: 5 × 224px, 32px gap at 1440 -->
+  <div class="mx-auto max-w-[90rem] px-4 pt-16 sm:px-6 lg:px-12 lg:pt-[104px] xl:px-24">
+    <nav aria-label="Footer" class="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
+      {
+        columns.map((col) => (
+          <div>
+            <h2 class="text-h4 font-medium text-brand-deep">{col.title}</h2>
+            <ul class="mt-4 flex flex-col md:mt-[42px] md:gap-[18px]">
+              {col.links.map((link) => (
+                <li>
+                  <a href={link.href} class={linkClass} {...(isExternal(link.href) && !link.href.startsWith("mailto:") ? { target: "_blank", rel: "noopener" } : {})}>
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </nav>
+  </div>
+
+  <!-- Big wordmark with soft coloured "hills" (blurred ellipses) -->
+  <div class="relative mt-10 h-[calc(min(20.83vw,300px)+190px)] lg:mt-0 lg:h-[470px]">
+    <div
+      class="absolute top-[30px] left-1/2 flex -translate-x-1/2 items-center gap-[0.12em] text-[min(20.83vw,300px)] leading-none lg:top-[70px]"
+      aria-hidden="true"
+    >
+      <LogoMark class="size-[0.736em] shrink-0 text-brand" />
+      <span class="font-medium tracking-[-0.05em] text-ink-2">{siteConfig.name}</span>
+    </div>
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <span class="absolute top-[64%] left-[-14%] h-[260px] w-[62%] rounded-full bg-mint-tint/95 blur-[80px]"></span>
+      <span class="absolute top-[70%] left-[36%] h-[240px] w-[49%] rounded-full bg-violet-tint/90 blur-[80px]"></span>
+      <span class="absolute top-[60%] left-[69%] h-[280px] w-[56%] rounded-full bg-lime-tint/95 blur-[80px]"></span>
+    </div>
+
+    <div
+      class="absolute inset-x-0 bottom-0 mx-auto flex max-w-[90rem] flex-col items-start gap-3 px-4 pt-6 pb-7 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-12 xl:px-24"
+    >
+      <p class="text-sm text-ink-2">{copyright}</p>
+      <ul class="flex flex-wrap items-center gap-x-6 md:absolute md:left-1/2 md:-translate-x-1/2">
+        {
+          siteConfig.socials.map((s) => (
+            <li>
+              <a href={s.href} target="_blank" rel="noopener" class="inline-flex min-h-11 items-center text-sm font-medium text-ink-2 hover:text-brand">
+                {s.label}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a href={`mailto:${siteConfig.email}`} class="inline-flex min-h-11 items-center text-sm font-medium text-ink-2 hover:text-brand">
+            {siteConfig.email}
+          </a>
+        </li>
+      </ul>
+      {
+        credit && (
+          <a
+            href={credit.href}
+            target="_blank"
+            rel="noopener"
+            class="inline-flex min-h-[34px] items-center rounded-pill bg-surface px-4 py-2 text-sm font-medium text-ink-2 transition-shadow hover:shadow-card"
+          >
+            {credit.label}
+          </a>
+        )
+      }
+    </div>
+  </div>
+</footer>

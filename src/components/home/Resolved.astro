@@ -1,0 +1,255 @@
+---
+import { Image } from "astro:assets";
+import { resolved as r } from "@/config/pages/home";
+import { getImage } from "@/lib/images";
+
+/**
+ * "98% of routine calls resolved" (Figma Section 295:15338, 1440×1015).
+ * Desktop: photos and mini cards float around the number. With motion allowed they are
+ * scroll-linked like the Framer site: the composition sticks while you scroll 1100px and
+ * every item glides from the centre (scale 0.82) to its place (1.0) and drifts past it (1.1).
+ * Phones and tablets show the number and text only (as on Framer).
+ */
+
+/**
+ * Scroll keyframes from Framer at 0 / 275 / 550 / 825 / 1100px of scroll into the section:
+ * [x, y, scale] for each. The middle keyframe (550px) is the Figma layout.
+ */
+const motion: Record<string, [number, number, number][]> = {
+  reader: [[107, 310, 0.82], [9, 163, 0.91], [0, 0, 1], [91, -158, 1.05], [279, -289, 1.1]],
+  family: [[-380, 136, 0.82], [-211, 42, 0.91], [0, 0, 1], [227, 21, 1.05], [440, 107, 1.1]],
+  hands: [[-215, -238, 0.82], [-73, -134, 0.91], [0, 0, 1], [-12, 149, 1.05], [-116, 295, 1.1]],
+  corridor: [[-445, -60, 0.82], [-215, -61, 0.91], [0, 0, 1], [168, 120, 1.05], [261, 289, 1.1]],
+  callLog: [[-25, 269, 0.82], [-52, 133, 0.91], [0, 0, 1], [131, -112, 1.05], [330, -187, 1.1]],
+  insurance: [[-299, -224, 0.82], [-118, -133, 0.91], [0, 0, 1], [31, 161, 1.05], [-36, 331, 1.1]],
+  weekly: [[227, -102, 0.82], [129, -36, 0.91], [0, 0, 1], [-145, -3, 1.05], [-288, -48, 1.1]],
+  refill: [[459, 132, 0.82], [211, 98, 0.91], [0, 0, 1], [-142, -154, 1.05], [-189, -349, 1.1]],
+};
+const m = (key: string) => JSON.stringify(motion[key]);
+
+const photo = "absolute overflow-hidden rounded-panel shadow-float";
+const card = "absolute rounded-chip px-3.5 py-3";
+const check = "M5.375 8.188 7.063 9.875l3.562-3.563";
+const logo = "M15.077 8A7.077 7.077 0 1 1 .923 8a7.077 7.077 0 0 1 14.154 0ZM4.923 4.308v7.384M11.077 4.308v7.384M4.923 8h6.154";
+---
+
+<section class="res relative" data-resolved aria-labelledby="resolved-title">
+  <div class="res-stage relative overflow-hidden lg:sticky lg:top-[-80px]">
+    <div class="res-comp relative mx-auto">
+      <div class="res-items hidden lg:block" aria-hidden="true">
+        <div class={photo} style="left:36px;top:290px;width:156px;height:190px" data-m={m("reader")}>
+          <Image src={getImage(r.photos.reader)} alt="" widths={[200, 400]} sizes="156px" class="size-full object-cover" />
+        </div>
+        <div class={`${card} w-[230px] bg-[#eff5fe]`} style="left:158.4px;top:250px" data-m={m("callLog")}>
+          <div class="flex items-center justify-between gap-4">
+            <span class="flex items-center gap-2 text-[13px] leading-[17px] font-medium text-ink">
+              <svg class="size-[22px]" viewBox="0 0 22 22" fill="none">
+                <rect width="22" height="22" rx="6" fill="#0069FF" />
+                <path d="M7.5 6.75h2l.9 2.25-1.2.8a5.7 5.7 0 0 0 2.75 2.75l.8-1.2 2.25.9v2a.75.75 0 0 1-.75.75A8.33 8.33 0 0 1 6.75 7.5a.75.75 0 0 1 .75-.75Z" stroke="#FCFBF8" />
+              </svg>
+              {r.callLog.name}
+            </span>
+            <span class="text-xs leading-4 font-medium tracking-[0.02em] text-brand-text">{r.callLog.time}</span>
+          </div>
+          <ul class="mt-2.5 flex w-[200px] flex-col gap-2">
+            {
+              r.callLog.rows.map((row) => (
+                <li class="flex items-center justify-between">
+                  <span class="flex items-center gap-2 text-[13px] leading-[17px] text-ink">
+                    <svg class="size-4" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#2C67F6" /><path d={check} stroke="#FCFBF8" stroke-width="1.275" /></svg>
+                    {row.label}
+                  </span>
+                  <span class="text-xs leading-4 text-muted">{row.time}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div class={photo} style="left:648px;top:40px;width:190px;height:132px" data-m={m("family")}>
+          <Image src={getImage(r.photos.family)} alt="" widths={[240, 480]} sizes="190px" class="size-full object-cover" />
+        </div>
+        <div class={photo} style="left:1197.6px;top:410px;width:156px;height:168px" data-m={m("hands")}>
+          <Image src={getImage(r.photos.hands)} alt="" widths={[200, 400]} sizes="156px" class="size-full object-cover" />
+        </div>
+        <div class={`${card} w-[250px] bg-mint-tint`} style="left:1182.8px;top:360px" data-m={m("insurance")}>
+          <div class="flex items-center justify-between gap-4">
+            <span class="flex items-center gap-2 text-[13px] leading-[17px] text-ink">
+              <svg class="size-4" viewBox="0 0 16 16" fill="none" stroke="#071A31" stroke-width="1.477" stroke-linecap="round"><path d={logo} /></svg>
+              {r.insurance.title}
+            </span>
+            <span class="text-xs leading-4 text-body">{r.insurance.date}</span>
+          </div>
+          <span class="mt-2 inline-block rounded-md bg-[#eff5fe] px-2 py-0.5 text-[11px] leading-[14px] font-medium tracking-[0.02em] text-brand-text">{r.insurance.badge}</span>
+          <div class="mt-2.5 flex justify-between gap-4 rounded-lg bg-canvas px-3 py-2.5">
+            <span>
+              <span class="block text-[13px] leading-[17px] text-ink">{r.insurance.plan}</span>
+              <span class="mt-0.5 block text-[11px] leading-[14px] font-medium tracking-[0.02em] text-subtle">{r.insurance.member}</span>
+            </span>
+            <span class="w-11 text-xs leading-4 font-medium tracking-[0.02em] text-ink">{r.insurance.status}</span>
+          </div>
+        </div>
+        <div class={`${card} w-[250px] bg-lime-tint`} style="left:617.2px;top:707px" data-m={m("weekly")}>
+          <p class="flex items-center gap-2 text-[13px] leading-[17px] text-ink">
+            <svg class="size-4" viewBox="0 0 16 16" fill="none" stroke="#071A31" stroke-width="1.477" stroke-linecap="round"><path d={logo} /></svg>
+            {r.weekly.title}
+          </p>
+          <ul class="mt-2.5 flex w-[220px] flex-col gap-1">
+            {
+              r.weekly.rows.map((row) => (
+                <li class="flex justify-between gap-5 rounded-md bg-canvas px-2.5 py-2 text-xs leading-4">
+                  <span class="text-ink">{row.label}</span>
+                  <span class:list={["font-medium tracking-[0.02em]", row.accent ? "text-brand-text" : "text-body"]}>{row.value}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div class={`${card} res-refill w-[250px]`} style="left:57.6px;top:737px" data-m={m("refill")}>
+          <p class="flex items-center gap-2 text-[13px] leading-[17px] text-ink">
+            <svg class="size-4" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#2C67F6" /><path d={check} stroke="#FCFBF8" stroke-width="1.275" /></svg>
+            {r.refill.title}
+          </p>
+          <p class="mt-1 pl-6 text-xs leading-4 text-muted">{r.refill.meta}</p>
+        </div>
+        <div class={photo} style="left:1068.8px;top:120px;width:112px;height:132px" data-m={m("corridor")}>
+          <Image src={getImage(r.photos.corridor)} alt="" widths={[160, 320]} sizes="112px" class="size-full object-cover" />
+        </div>
+      </div>
+
+      <div class="res-text relative mx-auto flex max-w-[718px] flex-col items-center px-4 text-center">
+        <p class="text-[64px] leading-[1.1] font-medium tracking-[-0.03em] text-[#2d4ebc] lg:text-[104px]" data-count={r.stat}>{r.stat}</p>
+        <h2 id="resolved-title" class="mt-5 text-h1 font-medium text-balance text-ink" data-split="chars">{r.title}</h2>
+        <p class="mt-2.5 max-w-[504px] text-lead text-muted" data-split="words">{r.description}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .res-comp {
+    padding-block: 80px;
+  }
+  .res-refill {
+    background:
+      radial-gradient(42% 42% at 50% 48%, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.35) 60%, rgb(255 255 255 / 0)),
+      radial-gradient(45% 75% at 0% 100%, #7baff9, rgb(158 197 250 / 0.7) 45%, rgb(200 222 251 / 0)),
+      radial-gradient(50% 60% at 55% 105%, #7fd3cb, rgb(171 228 221 / 0.6) 50%, rgb(208 240 234 / 0)),
+      radial-gradient(45% 70% at 0% 0%, #9ce1de, rgb(190 234 230 / 0.7) 50%, rgb(221 243 239 / 0)),
+      radial-gradient(55% 90% at 100% 35%, #e0eea0, rgb(232 243 194 / 0.75) 50%, rgb(240 247 222 / 0)),
+      #ecf7f1;
+  }
+
+  /* Desktop: the Figma 1440×1015 composition, scaled to fit smaller laptops. */
+  @media (min-width: 1024px) {
+    .res {
+      --s: 0.71;
+    }
+    .res-stage {
+      height: calc(1015px * var(--s));
+    }
+    .res-comp {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 1440px;
+      height: 1015px;
+      padding: 0;
+      margin-left: -720px;
+      transform: scale(var(--s));
+      transform-origin: 50% 0;
+    }
+    .res-text {
+      position: absolute;
+      top: 301px;
+      left: 361px;
+      width: 718px;
+      padding: 0;
+    }
+    .res-text h2 {
+      font-size: 54px;
+    }
+  }
+  @media (min-width: 1280px) {
+    .res {
+      --s: 0.85;
+    }
+  }
+  @media (min-width: 1440px) {
+    .res {
+      --s: 1;
+    }
+  }
+  /* Scroll-linked version: 1100px of extra scroll while the stage sticks. */
+  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+    :global(html.js) .res {
+      height: calc(1015px * var(--s) + 1100px);
+    }
+    [data-m] {
+      will-change: transform;
+    }
+  }
+</style>
+
+<script>
+  import { reduceMotion } from "@/scripts/motion";
+
+  type Key = [number, number, number];
+  const STOPS = [0, 275, 550, 825, 1100];
+  const section = document.querySelector<HTMLElement>("[data-resolved]");
+  const desktop = window.matchMedia("(min-width: 1024px)");
+
+  if (section && !reduceMotion()) {
+    const items = Array.from(section.querySelectorAll<HTMLElement>("[data-m]")).map((el) => ({
+      el,
+      keys: JSON.parse(el.dataset.m ?? "[]") as Key[],
+      cur: null as Key | null,
+    }));
+
+    const target = (keys: Key[], s: number): Key => {
+      if (s <= STOPS[0]) return keys[0];
+      for (let i = 1; i < STOPS.length; i++) {
+        if (s <= STOPS[i]) {
+          const t = (s - STOPS[i - 1]) / (STOPS[i] - STOPS[i - 1]);
+          const a = keys[i - 1];
+          const b = keys[i];
+          return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+        }
+      }
+      return keys[keys.length - 1];
+    };
+
+    let raf = 0;
+    let last = 0;
+    const frame = (now: number) => {
+      raf = 0;
+      if (!desktop.matches) {
+        items.forEach((it) => ((it.el.style.transform = ""), (it.cur = null)));
+        return;
+      }
+      // Framer smooths the scroll value with a spring (stiffness 200, damping 45): ease towards the target.
+      const dt = last ? Math.min(0.05, (now - last) / 1000) : 1;
+      last = now;
+      const k = 1 - Math.exp(-dt * 9);
+      const s = -section.getBoundingClientRect().top;
+      let moving = false;
+      for (const it of items) {
+        const t = target(it.keys, s);
+        if (!it.cur) it.cur = [...t];
+        else
+          for (let i = 0; i < 3; i++) {
+            it.cur[i] += (t[i] - it.cur[i]) * k;
+            if (Math.abs(t[i] - it.cur[i]) > (i === 2 ? 0.0005 : 0.1)) moving = true;
+          }
+        it.el.style.transform = `translate(${it.cur[0].toFixed(2)}px, ${it.cur[1].toFixed(2)}px) scale(${it.cur[2].toFixed(4)})`;
+      }
+      if (moving) raf = requestAnimationFrame(frame);
+      else last = 0;
+    };
+    const request = () => {
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
+    window.addEventListener("scroll", request, { passive: true });
+    window.addEventListener("resize", request, { passive: true });
+    request();
+  }
+</script>

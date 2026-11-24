@@ -1,0 +1,11 @@
+---
+/** "## Heading" in blog posts. Keeps the id from MDX so the "On this page" links work. */
+interface Props {
+  id?: string;
+}
+const { id } = Astro.props;
+---
+
+<h2 id={id} class="mt-[25px] scroll-mt-28 text-[28px] leading-[1.2] font-medium tracking-[-0.02em] text-ink-2 first:mt-0 sm:text-[32px]">
+  <slot />
+</h2>

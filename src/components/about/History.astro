@@ -1,0 +1,203 @@
+---
+import Eyebrow from "@/components/ui/Eyebrow.astro";
+import SplitText from "./SplitText.astro";
+import { history } from "@/config/pages/about";
+
+/**
+ * "Company History" (Figma "History", 1440×976): a dial of ticks above a horizontal
+ * timeline. The centre card sits on a blue "spotlight"; the track slides one card per
+ * step (prev / next buttons, swipe, autoplay every few seconds) and the dial turns 4° per step,
+ * as on the Framer site. Without JavaScript the start card is shown in the centre.
+ */
+const h = history;
+/** Bars in each progress meter (Figma: 42 bars, 6.4px apart). */
+const bars = 42;
+/** Dial ticks: every 4°, 29 on each side of the centre tick; opacity fades towards the ends (Figma values). */
+const fade = [0.72, 0.718, 0.712, 0.702, 0.688, 0.67, 0.649, 0.624, 0.596, 0.566, 0.533, 0.498, 0.462, 0.424, 0.386, 0.347, 0.309, 0.272, 0.236, 0.202, 0.172, 0.142, 0.114, 0.09, 0.07, 0.05, 0.035, 0.025, 0.015, 0.01];
+const ticks = Array.from({ length: 59 }, (_, k) => k - 29).filter((k) => k !== 0);
+---
+
+<section class="history relative isolate overflow-hidden" aria-labelledby="history-title" data-history data-autoplay={h.autoplay} style={`--i:${h.start};--start:${h.start}`}>
+  <div class="glow -top-[120px] -left-[200px] h-[520px] w-[760px] bg-[#7baff9] opacity-45" aria-hidden="true"></div>
+  <div class="glow top-[380px] left-[calc(50%-300px)] h-[420px] w-[600px] bg-brand opacity-25" aria-hidden="true"></div>
+  <div class="glow top-[520px] left-[calc(50%+180px)] h-[560px] w-[760px] bg-violet-tint opacity-45" aria-hidden="true"></div>
+
+  <div class="relative flex flex-col items-center px-4 pt-12 text-center sm:px-6 lg:pt-[66px]">
+    <Eyebrow {...h.eyebrow} />
+    <h2 id="history-title" class="mt-4 text-display leading-[1.3] font-medium text-ink-2">{h.title}</h2>
+    <p class="mt-[3px] text-lg leading-[23px] text-body">{h.description}</p>
+  </div>
+
+  <div class="stage relative mt-[170px] lg:mt-[241px]" role="region" aria-roledescription="carousel" aria-label={h.labels.region}>
+    <svg class="dial pointer-events-none absolute left-1/2 size-[1000px]" viewBox="-500 -500 1000 1000" fill="none" aria-hidden="true">
+      {
+        ticks.map((k) => (
+          <line
+            x1="0"
+            y1="400"
+            x2="0"
+            y2="428"
+            stroke="#0c1a2f"
+            stroke-opacity={fade[Math.abs(k)]}
+            stroke-width="2"
+            stroke-linecap="round"
+            transform={`rotate(${k * 4})`}
+          />
+        ))
+      }
+      <line class="dial-needle" x1="0" y1="400" x2="0" y2="464" stroke="#2c67f6" stroke-width="3" stroke-linecap="round" />
+    </svg>
+
+    <div class="spotlight absolute top-0 left-1/2 h-full -translate-x-1/2 rounded-[28px] bg-white/95" aria-hidden="true"></div>
+
+    <ol class="track relative ml-[50%] flex w-max gap-6" data-track>
+      {
+        h.milestones.map((m, i) => (
+          <li
+            class="card flex min-h-[312px] shrink-0 flex-col rounded-[28px] border border-white/90 bg-white/70 px-[23px] py-[31px] sm:px-[29px]"
+            data-card
+            data-far={Math.abs(i - h.start) > 1 ? "" : undefined}
+            aria-current={i === h.start ? "true" : undefined}
+          >
+            <p class="self-start rounded-lg border-[1.5px] border-ink-2/12 px-3 py-[5px] font-mono text-[15px] leading-5 font-medium tracking-[0.04em] text-ink-2">{m.year}</p>
+            <SplitText as="h3" text={m.title} mode="chars" class="mt-[18px] text-[24px] leading-[1.2] font-medium tracking-[-0.015em] text-ink-2 sm:text-[26px]" />
+            <p class="mt-[18px] mb-[18px] text-base leading-[26px] tracking-[-0.01em] text-body">{m.text}</p>
+            <div class="progress relative mt-auto h-[52px] shrink-0 rounded-[14px] bg-ink-2/5" aria-hidden="true">
+              <span class="bars absolute inset-y-[14px] left-[14px] w-[264px] opacity-25" />
+              <span class="bars bars-on absolute inset-y-[14px] left-[14px]" style={`width:${Math.round(m.progress * bars) * 6.4 - 4.9}px`} />
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+
+  <div class="relative flex justify-center gap-3 pt-14 pb-16 lg:pb-[100px]">
+    <button type="button" class="flex size-12 items-center justify-center rounded-full bg-sky-tint text-lg font-medium text-ink transition-colors hover:bg-sky" data-prev aria-label={h.labels.prev}>
+      <span aria-hidden="true">←</span>
+    </button>
+    <button type="button" class="flex size-12 items-center justify-center rounded-full bg-brand text-lg font-medium text-white transition-colors hover:bg-brand-hover" data-next aria-label={h.labels.next}>
+      <span aria-hidden="true">→</span>
+    </button>
+  </div>
+</section>
+
+<style>
+  .history {
+    --cw: min(340px, calc(100vw - 50px));
+    background:
+      linear-gradient(180deg, #fff, rgb(255 255 255 / 0.85) 35%, rgb(255 255 255 / 0) 70%),
+      radial-gradient(70% 75% at 0% 105%, #eba451, rgb(243 199 146 / 0.75) 40%, rgb(249 231 203 / 0)),
+      radial-gradient(75% 80% at 100% 100%, #dceb96, rgb(234 243 188 / 0.7) 45%, rgb(244 248 223 / 0)),
+      #fdfcf7;
+  }
+  .glow {
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+  }
+  .dial {
+    top: -975px;
+    margin-left: -500px;
+    transform: rotate(calc((var(--i) - var(--start)) * -4deg));
+    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (min-width: 1024px) {
+    .dial {
+      top: -1010px;
+    }
+  }
+  .spotlight {
+    width: var(--cw);
+    outline: 2px solid rgb(44 103 246 / 0.9);
+    box-shadow: 0 20px 56px -8px rgb(44 103 246 / 0.25);
+  }
+  .track {
+    transform: translateX(calc(-1 * (var(--i) * (var(--cw) + 24px) + var(--cw) / 2)));
+    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    touch-action: pan-y;
+  }
+  .card {
+    width: var(--cw);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 16px 40px -12px rgb(12 26 47 / 0.08);
+  }
+  .progress {
+    transition: opacity 0.6s ease;
+  }
+  .card[data-far] .progress {
+    opacity: 0.5;
+  }
+  .bars {
+    background: repeating-linear-gradient(90deg, #0c1a2f 0 1.5px, transparent 1.5px 6.4px);
+  }
+  .bars-on {
+    background: repeating-linear-gradient(90deg, #2c67f6 0 1.5px, transparent 1.5px 6.4px);
+  }
+</style>
+
+<script>
+  import { reduceMotion } from "@/scripts/motion";
+
+  document.querySelectorAll<HTMLElement>("[data-history]").forEach((root) => {
+    const cards = [...root.querySelectorAll<HTMLElement>("[data-card]")];
+    const track = root.querySelector<HTMLElement>("[data-track]");
+    const count = cards.length;
+    let index = Number(root.style.getPropertyValue("--i")) || 0;
+    const seconds = Number(root.dataset.autoplay ?? 0);
+
+    const go = (next: number) => {
+      index = (next + count) % count;
+      root.style.setProperty("--i", String(index));
+      cards.forEach((card, i) => {
+        card.toggleAttribute("data-far", Math.abs(i - index) > 1);
+        if (i === index) card.setAttribute("aria-current", "true");
+        else card.removeAttribute("aria-current");
+      });
+    };
+
+    // Autoplay: only while the section is on screen and nobody is interacting with it.
+    let timer = 0;
+    let visible = false;
+    let paused = false;
+    const stop = () => window.clearInterval(timer);
+    const start = () => {
+      stop();
+      if (!seconds || reduceMotion() || !visible || paused) return;
+      timer = window.setInterval(() => go(index + 1), seconds * 1000);
+    };
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      start();
+    }).observe(root);
+    const pause = (value: boolean) => () => {
+      paused = value;
+      start();
+    };
+    const stage = root.querySelector<HTMLElement>(".stage");
+    stage?.addEventListener("pointerenter", pause(true));
+    stage?.addEventListener("pointerleave", pause(false));
+    root.addEventListener("focusin", pause(true));
+    root.addEventListener("focusout", pause(false));
+
+    root.querySelector("[data-prev]")?.addEventListener("click", () => go(index - 1));
+    root.querySelector("[data-next]")?.addEventListener("click", () => go(index + 1));
+
+    // Swipe on touch screens.
+    let x0: number | null = null;
+    track?.addEventListener("pointerdown", (e) => (x0 = e.pointerType === "mouse" ? null : e.clientX), { passive: true });
+    track?.addEventListener(
+      "pointerup",
+      (e) => {
+        if (x0 === null) return;
+        const dx = e.clientX - x0;
+        if (Math.abs(dx) > 40) go(index + (dx < 0 ? 1 : -1));
+        x0 = null;
+      },
+      { passive: true },
+    );
+  });
+</script>

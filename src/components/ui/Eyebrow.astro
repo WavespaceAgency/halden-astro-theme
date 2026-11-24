@@ -1,0 +1,38 @@
+---
+import { cn } from "@/lib/utils";
+
+export type EyebrowTone = "mint" | "lime" | "sky" | "violet" | "white";
+
+interface Props {
+  /** Label text (shown uppercase in Geist Mono). */
+  label: string;
+  /** SVG path data for the 28×28 icon tile (stroke icon, drawn on a 28px grid). Leave out for no tile. */
+  icon?: string;
+  tone?: EyebrowTone;
+  /** "light" = white label for dark backgrounds. */
+  theme?: "dark" | "light";
+  class?: string;
+}
+
+/** Small label above section headings: coloured icon tile + mono uppercase text (Figma "Eyebrow"). */
+const { label, icon, tone = "mint", theme = "dark", class: className } = Astro.props;
+const tiles: Record<EyebrowTone, string> = {
+  mint: "#c5eeec",
+  lime: "#daeb8c",
+  sky: "#c3dffe",
+  violet: "#d1c3fb",
+  white: "#ffffff",
+};
+---
+
+<p class={cn("flex items-center gap-2.5", className)}>
+  {
+    icon && (
+      <svg class="size-7 shrink-0" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <rect width="28" height="28" rx="8" fill={tiles[tone]} />
+        <path d={icon} stroke="#0c1a2f" stroke-width="1.476" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    )
+  }
+  <span class={cn("font-mono text-sm font-semibold tracking-[0.06em] uppercase", theme === "light" ? "text-white" : "text-ink")}>{label}</span>
+</p>

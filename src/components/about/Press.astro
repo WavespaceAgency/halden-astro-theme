@@ -1,0 +1,141 @@
+---
+import { Image } from "astro:assets";
+import Button from "@/components/ui/Button.astro";
+import Container from "@/components/ui/Container.astro";
+import Eyebrow from "@/components/ui/Eyebrow.astro";
+import SplitText from "./SplitText.astro";
+import { press } from "@/config/pages/about";
+import { formatDate, getPosts } from "@/lib/content";
+
+/**
+ * "Halden in the news" (Figma "Press", 1440×969): the newest blog posts, three per page,
+ * with round page buttons (shown when there is more than one page and JavaScript runs).
+ */
+const posts = (await getPosts()).slice(0, press.perPage * press.maxPages);
+const pages = Array.from({ length: Math.ceil(posts.length / press.perPage) }, (_, p) => posts.slice(p * press.perPage, (p + 1) * press.perPage));
+const initials = (name: string) =>
+  name
+    .replace(/^(Dr|Mr|Mrs|Ms)\.?\s+/i, "")
+    .split(/\s+/)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+---
+
+{
+  posts.length > 0 && (
+    <section class="bg-surface pt-16 pb-20 sm:pt-24 lg:pt-[120px] lg:pb-[140px]" aria-labelledby="press-title" data-press>
+      <Container>
+        <div class="flex flex-col items-start gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <Eyebrow {...press.eyebrow} />
+            <h2 id="press-title" class="mt-4 text-h1 leading-[1.3] font-medium text-ink-2">
+              {press.title}
+            </h2>
+          </div>
+          <Button href={press.viewAll.href} variant="outline" size="xl" class="border-black/16 bg-transparent text-ink">
+            {press.viewAll.label}
+          </Button>
+        </div>
+
+        <div class="mt-10 lg:mt-12">
+          {pages.map((page, p) => (
+            <ul class="press-page grid gap-12 md:grid-cols-3 md:gap-8" data-page={p} hidden={p > 0}>
+              {page.map((post) => (
+                <li class="group relative flex flex-col">
+                  <div class="overflow-hidden rounded-lg">
+                    <Image
+                      src={post.data.image}
+                      alt={post.data.imageAlt}
+                      widths={[400, 600, 800]}
+                      sizes="(min-width: 1440px) 395px, (min-width: 768px) 30vw, 100vw"
+                      class="aspect-[395/270] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      loading="lazy"
+                    />
+                  </div>
+                  <p class="mt-8 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm leading-[18px] text-muted">
+                    {post.data.author.avatar ? (
+                      <Image src={post.data.author.avatar} alt="" width={48} height={48} class="size-6 rounded-full object-cover" />
+                    ) : (
+                      <span class="flex size-6 items-center justify-center rounded-full bg-[#c8defb] text-[10px] font-medium text-ink-2" aria-hidden="true">
+                        {initials(post.data.author.name)}
+                      </span>
+                    )}
+                    <span class="font-medium text-ink">{post.data.author.name}</span>
+                    <span class="flex gap-2 whitespace-nowrap">
+                      <span aria-hidden="true">·</span>
+                      <time datetime={post.data.date}>{formatDate(post.data.date)}</time>
+                    </span>
+                    <span class="flex gap-2 whitespace-nowrap">
+                      <span aria-hidden="true">·</span>
+                      <span>{post.data.readingTime}</span>
+                    </span>
+                  </p>
+                  <SplitText
+                    as="h3"
+                    mode="chars"
+                    stagger={0.015}
+                    text={post.data.title}
+                    class="mt-4 text-[22px] leading-[1.22] font-medium tracking-[-0.015em] text-ink-2 sm:text-2xl"
+                  />
+                  <p class="mt-[7px] max-w-[360px] text-base leading-[26px] text-[#4c565f]">{post.data.excerpt}</p>
+                  <a href={`/blog/${post.id}`} class="absolute inset-0 rounded-lg" aria-label={post.data.title} />
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
+
+        {pages.length > 1 && (
+          <nav class="mt-12 flex gap-2" aria-label={press.labels.pagination} hidden data-pager>
+            {pages.map((_, p) => (
+              <button
+                type="button"
+                class="flex size-10 items-center justify-center rounded-full border border-ink-2/12 text-[15px] font-medium text-ink-2 transition-colors hover:bg-canvas-2 aria-[current=true]:border-brand-bright aria-[current=true]:bg-brand-bright aria-[current=true]:text-white"
+                aria-label={`${press.labels.page} ${p + 1}`}
+                aria-current={p === 0 ? "true" : undefined}
+                data-goto={p}
+              >
+                {p + 1}
+              </button>
+            ))}
+          </nav>
+        )}
+      </Container>
+    </section>
+  )
+}
+
+<style>
+  @media (prefers-reduced-motion: no-preference) {
+    .press-page:not([hidden]) {
+      animation: press-in 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  }
+  @keyframes press-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-press]").forEach((root) => {
+    const pager = root.querySelector<HTMLElement>("[data-pager]");
+    if (!pager) return;
+    pager.hidden = false;
+    const pages = [...root.querySelectorAll<HTMLElement>("[data-page]")];
+    const buttons = [...pager.querySelectorAll<HTMLButtonElement>("[data-goto]")];
+    buttons.forEach((button) =>
+      button.addEventListener("click", () => {
+        const target = Number(button.dataset.goto);
+        pages.forEach((page, i) => (page.hidden = i !== target));
+        buttons.forEach((b, i) => (i === target ? b.setAttribute("aria-current", "true") : b.removeAttribute("aria-current")));
+        // The letters of titles on a newly shown page play their effect again.
+        pages[target].querySelectorAll("[data-about-split]").forEach((el) => el.setAttribute("data-in", ""));
+      }),
+    );
+  });
+</script>

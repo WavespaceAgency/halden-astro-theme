@@ -1,0 +1,16 @@
+---
+import { siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils";
+import LogoMark from "./LogoMark.astro";
+
+interface Props {
+  class?: string;
+}
+/** Logo mark + site name. Links to the home page. Replace LogoMark.astro with your own mark. */
+const { class: className } = Astro.props;
+---
+
+<a href="/" class={cn("inline-flex min-h-11 items-center gap-[11px] rounded-lg", className)} aria-label={`${siteConfig.name} – home`}>
+  <LogoMark class="size-6 text-brand-bright" />
+  <span class="text-[21px] leading-[27px] font-semibold tracking-[-0.02em] text-ink">{siteConfig.name}</span>
+</a>

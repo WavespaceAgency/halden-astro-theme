@@ -1,0 +1,169 @@
+---
+import { bookDemo } from "@/config/pages/book-a-demo";
+import { buttonClasses } from "@/lib/button";
+import { cn } from "@/lib/utils";
+
+/**
+ * "Book your demo" form. Labels, browser-side validation with inline errors
+ * and a success message. Nothing is sent yet – hook it up to your CRM or form
+ * service in the script below (see TODO).
+ */
+const f = bookDemo.form;
+const { name, email, clinic, phone, locations, message } = f.fields;
+
+const input =
+  "w-full rounded-[10px] border border-line bg-surface px-[18px] text-base leading-[26px] text-ink placeholder:text-muted transition-[border-color,box-shadow] hover:border-ink/25 focus:border-brand focus:ring-3 focus:ring-brand/15 focus:outline-none aria-invalid:border-[#b42318] aria-invalid:ring-[#b42318]/10";
+const labelClass = "text-[13px] leading-[17px] font-medium text-ink";
+const errorClass = "text-[13px] leading-[17px] text-[#b42318] empty:hidden";
+
+const textFields = [
+  { id: "name", type: "text", autocomplete: "name", ...name },
+  { id: "email", type: "email", autocomplete: "email", ...email },
+  { id: "clinic", type: "text", autocomplete: "organization", ...clinic },
+  { id: "phone", type: "tel", autocomplete: "tel", ...phone },
+] as const;
+---
+
+<div class="rounded-[28px] bg-surface p-6 sm:p-10 xl:w-[600px] xl:shrink-0" data-demo>
+  <form class="flex flex-col gap-6" novalidate data-demo-form>
+    <div class="flex flex-col gap-2">
+      <h2 class="text-[28px] leading-9 font-medium tracking-[-0.015em] text-ink">{f.title}</h2>
+      <p class="text-base leading-[21px] text-muted">{f.description}</p>
+    </div>
+
+    <p class="sr-only" role="alert" data-demo-summary></p>
+
+    <div class="grid gap-6 sm:grid-cols-2 sm:gap-x-4">
+      {
+        textFields.map((field) => (
+          <div class="flex flex-col gap-2">
+            <label for={`demo-${field.id}`} class={labelClass}>
+              {field.label}
+            </label>
+            <input
+              id={`demo-${field.id}`}
+              name={field.id}
+              type={field.type}
+              autocomplete={field.autocomplete}
+              placeholder={field.placeholder}
+              required
+              minlength={field.id === "phone" ? 7 : undefined}
+              aria-describedby={`demo-${field.id}-error`}
+              class={cn(input, "h-[52px]")}
+            />
+            <p id={`demo-${field.id}-error`} class={errorClass} data-error={field.error}></p>
+          </div>
+        ))
+      }
+
+      <div class="flex flex-col gap-2 sm:col-span-2">
+        <label for="demo-locations" class={labelClass}>{locations.label}</label>
+        <div class="relative">
+          <select
+            id="demo-locations"
+            name="locations"
+            required
+            aria-describedby="demo-locations-error"
+            class={cn(input, "h-[52px] appearance-none pr-12 invalid:text-muted")}
+          >
+            <option value="" disabled selected>{locations.placeholder}</option>
+            {locations.options.map((option) => <option class="text-ink">{option}</option>)}
+          </select>
+          <svg class="pointer-events-none absolute top-1/2 right-[22px] h-[5px] w-2.5 -translate-y-1/2 text-muted" viewBox="0 0 10 5" fill="none" aria-hidden="true">
+            <path d="m.5.5 4.5 4 4.5-4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </div>
+        <p id="demo-locations-error" class={errorClass} data-error={locations.error}></p>
+      </div>
+
+      <div class="flex flex-col gap-2 sm:col-span-2">
+        <label for="demo-message" class={labelClass}>{message.label}</label>
+        <textarea id="demo-message" name="message" rows="4" placeholder={message.placeholder} class={cn(input, "h-[140px] resize-y py-[13px]")}></textarea>
+      </div>
+    </div>
+
+    <div>
+      <button type="submit" class="inline-flex min-h-[52px] items-center justify-center rounded-button bg-brand px-[17px] text-base leading-6 font-medium text-canvas transition-[background-color,transform] duration-150 hover:bg-brand-hover active:scale-[0.97] disabled:opacity-60" data-sending-label={f.sending}>
+        {f.submit}
+      </button>
+    </div>
+  </form>
+
+  <div class="flex flex-col items-start gap-4 py-6" hidden data-demo-success>
+    <span class="flex size-12 items-center justify-center rounded-full bg-sky-soft" aria-hidden="true">
+      <svg class="size-6 text-brand" viewBox="0 0 24 24" fill="none">
+        <path d="M5 12.5 10 17.5 19 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </span>
+    <h2 class="text-[28px] leading-9 font-medium tracking-[-0.015em] text-ink focus:outline-none" tabindex="-1">{f.success.title}</h2>
+    <p class="max-w-[440px] text-base leading-6 text-body">{f.success.description}</p>
+    <button type="button" class={buttonClasses({ variant: "outline", size: "md" })} data-demo-again>{f.success.again}</button>
+  </div>
+</div>
+
+<script is:inline define:vars={{ summaryText: f.errorSummary }}>
+  document.querySelectorAll("[data-demo]").forEach((root) => {
+    const form = root.querySelector("[data-demo-form]");
+    const success = root.querySelector("[data-demo-success]");
+    const summary = root.querySelector("[data-demo-summary]");
+    const submit = form.querySelector('button[type="submit"]');
+    const fields = Array.from(form.querySelectorAll("input, select"));
+    let submitted = false;
+
+    const validate = (field) => {
+      const error = document.getElementById(`${field.id}-error`);
+      let valid = field.checkValidity() && field.value.trim() !== "";
+      if (field.name === "phone") valid = valid && field.value.replace(/\D/g, "").length >= 7;
+      if (valid) field.removeAttribute("aria-invalid");
+      else field.setAttribute("aria-invalid", "true");
+      if (error) error.textContent = valid ? "" : error.dataset.error;
+      return valid;
+    };
+
+    fields.forEach((field) => {
+      const recheck = () => submitted && validate(field);
+      field.addEventListener("input", recheck);
+      field.addEventListener("change", recheck);
+      field.addEventListener("blur", recheck);
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      submitted = true;
+      const invalid = fields.filter((field) => !validate(field));
+      if (invalid.length) {
+        summary.textContent = summaryText;
+        invalid[0].focus();
+        return;
+      }
+      summary.textContent = "";
+      const label = submit.textContent;
+      submit.disabled = true;
+      submit.textContent = submit.dataset.sendingLabel;
+
+      // TODO: send the request to your CRM or form service, e.g.
+      // await fetch("https://example.com/api/demo-requests", { method: "POST", body: new FormData(form) });
+      const data = Object.fromEntries(new FormData(form));
+      void data;
+
+      submit.disabled = false;
+      submit.textContent = label;
+      form.hidden = true;
+      success.hidden = false;
+      success.querySelector("h2").focus();
+    });
+
+    root.querySelector("[data-demo-again]").addEventListener("click", () => {
+      form.reset();
+      submitted = false;
+      fields.forEach((field) => {
+        field.removeAttribute("aria-invalid");
+        const error = document.getElementById(`${field.id}-error`);
+        if (error) error.textContent = "";
+      });
+      success.hidden = true;
+      form.hidden = false;
+      form.querySelector("input").focus();
+    });
+  });
+</script>

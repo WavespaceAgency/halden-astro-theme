@@ -1,0 +1,48 @@
+---
+import { Image } from "astro:assets";
+import Button from "@/components/ui/Button.astro";
+import Container from "@/components/ui/Container.astro";
+import { hero } from "@/config/pages/platform";
+import { getImage } from "@/lib/images";
+
+/** Platform hero: rounded photo card (Figma 1376×600) with a centred heading and one button. */
+---
+
+<section class="pb-6 lg:pb-8">
+  <Container size="wide">
+    <div class="relative isolate flex min-h-[410px] items-center justify-center overflow-hidden rounded-card px-5 py-16 sm:min-h-[480px] lg:h-[600px] lg:py-0">
+      <Image
+        src={getImage(hero.image)}
+        alt=""
+        widths={[640, 1024, 1376, 1792]}
+        sizes="(min-width: 1440px) 1376px, calc(100vw - 32px)"
+        class="absolute inset-0 -z-20 size-full object-cover"
+        loading="eager"
+        fetchpriority="high"
+      />
+      <!-- Figma overlay is 962px tall on a 600px card, so only its top 62% shows -->
+      <div
+        class="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgb(9_20_20/0.62)_0%,rgb(19_44_52/0.35)_88%,rgb(21_49_56/0.355)_100%)]"
+        aria-hidden="true"
+      >
+      </div>
+
+      <div class="flex max-w-[760px] flex-col items-center gap-8 text-center">
+        <div class="flex flex-col items-center gap-3">
+          <h1 class="text-display font-medium whitespace-pre-line text-balance text-white" data-fx="chars" data-fx-load style="--fx-d: 0.15s">
+            {hero.title}
+          </h1>
+          <p class="max-w-[574px] text-lead text-white/85" data-fx="words" data-fx-load style="--fx-d: 0.45s">{hero.description}</p>
+        </div>
+        <Button
+          href={hero.cta.href}
+          size="lg"
+          class="hero-reveal rounded-[22px] text-base shadow-[0_0_24px_0_rgb(44_103_246/0.45)]"
+          style="--delay: 0.6s"
+        >
+          {hero.cta.label}
+        </Button>
+      </div>
+    </div>
+  </Container>
+</section>

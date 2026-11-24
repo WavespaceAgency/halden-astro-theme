@@ -1,0 +1,132 @@
+---
+/**
+ * Framer text effects for headings and paragraphs (used on most pages).
+ *   data-split="chars"  each letter pops in (scale 0.1 → 1, spring, 0.03s apart) – headings
+ *   data-split="words"  each word un-blurs and rises 12px (0.025s apart) – paragraphs
+ * Starts when half of the element is in view. Screen readers get the plain text
+ * (the animated copy is aria-hidden). Without JS or with reduced motion nothing changes.
+ * Include this component once per page.
+ */
+---
+
+<style is:global>
+  /* inline-block pieces do not inherit underlines – pass them down explicitly */
+  .split-word,
+  .split-c,
+  .split-w {
+    text-decoration: inherit;
+    text-underline-offset: inherit;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html.js [data-split]:not([data-split-ready]) {
+      opacity: 0;
+    }
+    /* Split letters lose kerning – switch it off from the start so the heading
+       keeps the same width (and line breaks) before and after the split: no layout shift. */
+    html.js [data-split="chars"] {
+      font-kerning: none;
+    }
+    .split-c,
+    .split-w {
+      display: inline-block;
+      white-space: pre;
+    }
+    .split-word {
+      display: inline-block;
+      white-space: nowrap;
+    }
+    [data-split-ready]:not([data-split-play]) .split-c {
+      opacity: 0.001;
+      transform: scale(0.1);
+    }
+    [data-split-ready]:not([data-split-play]) .split-w {
+      opacity: 0.001;
+      filter: blur(8px);
+      transform: translateY(12px);
+    }
+    .split-c {
+      transition:
+        opacity 0.35s ease-out var(--d),
+        transform 0.8s cubic-bezier(0.34, 1.45, 0.64, 1) var(--d);
+    }
+    .split-w {
+      transition:
+        opacity 0.5s ease-out var(--d),
+        filter 0.6s ease-out var(--d),
+        transform 0.7s cubic-bezier(0.25, 1.1, 0.5, 1) var(--d);
+    }
+  }
+</style>
+
+<script>
+  import { reduceMotion } from "@/scripts/motion";
+
+  function split(el: HTMLElement) {
+    const mode = el.dataset.split;
+    const step = mode === "chars" ? 0.03 : 0.025;
+    const start = mode === "chars" ? 0.15 : 0.3;
+    const keepBreaks = getComputedStyle(el).whiteSpace.startsWith("pre");
+    const visual = el.cloneNode(true) as HTMLElement;
+    let i = 0;
+    const walker = document.createTreeWalker(visual, NodeFilter.SHOW_TEXT);
+    const texts: Text[] = [];
+    while (walker.nextNode()) texts.push(walker.currentNode as Text);
+    for (const node of texts) {
+      const frag = document.createDocumentFragment();
+      for (const part of (node.textContent ?? "").split(/(\s+)/)) {
+        if (!part) continue;
+        if (/^\s+$/.test(part)) {
+          frag.append(keepBreaks && part.includes("\n") ? document.createElement("br") : " ");
+          continue;
+        }
+        if (mode === "words") {
+          const w = document.createElement("span");
+          w.className = "split-w";
+          w.style.setProperty("--d", `${(start + i++ * step).toFixed(3)}s`);
+          w.textContent = part;
+          frag.append(w);
+        } else {
+          const word = document.createElement("span");
+          word.className = "split-word";
+          for (const ch of part) {
+            const c = document.createElement("span");
+            c.className = "split-c";
+            c.style.setProperty("--d", `${(start + i++ * step).toFixed(3)}s`);
+            c.textContent = ch;
+            word.append(c);
+          }
+          frag.append(word);
+        }
+      }
+      node.replaceWith(frag);
+    }
+    const sr = document.createElement("span");
+    sr.className = "sr-only";
+    sr.textContent = (el.innerText || el.textContent || "").replace(/\s+/g, " ").trim();
+    const shown = document.createElement("span");
+    shown.setAttribute("aria-hidden", "true");
+    shown.append(...Array.from(visual.childNodes));
+    el.replaceChildren(sr, shown);
+  }
+
+  const els = document.querySelectorAll<HTMLElement>("[data-split]");
+  if (!reduceMotion() && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          (entry.target as HTMLElement).setAttribute("data-split-play", "");
+          io.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.5 },
+    );
+    els.forEach((el) => {
+      split(el);
+      el.setAttribute("data-split-ready", "");
+      io.observe(el);
+    });
+  } else {
+    els.forEach((el) => el.setAttribute("data-split-ready", ""));
+  }
+</script>

@@ -1,0 +1,214 @@
+---
+import Eyebrow from "@/components/ui/Eyebrow.astro";
+import { jobs as j } from "@/config/pages/home";
+import JobVisual from "./JobVisual.astro";
+
+/**
+ * "How it works" – four jobs (Figma Section 660:10082, 1440×1128).
+ * Desktop (1024px+, with JS): tabs on the left, one job visible at a time. With motion
+ * allowed the block sticks and the jobs switch every 500px of scroll, like the Framer site;
+ * the tabs also work by click and arrow keys. Phones, tablets and no-JS: the four jobs are
+ * stacked (text + mock-up each), so all content is readable.
+ */
+const pad = (n: number) => String(n + 1).padStart(2, "0");
+---
+
+<section class="bg-canvas py-20 lg:py-32" aria-labelledby="jobs-title" data-jobs>
+  <div class="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-10">
+    <div class="flex flex-col items-center text-center">
+      <Eyebrow {...j.eyebrow} />
+      <h2 id="jobs-title" class="mt-[19px] max-w-[960px] text-h1 font-medium whitespace-pre-line text-balance text-ink" data-split="chars">
+        {j.title}<span class="text-muted">{j.titleMuted}</span>
+      </h2>
+      <p class="mt-[19px] max-w-[620px] text-lead text-muted" data-split="words">{j.description}</p>
+    </div>
+
+    <div class="jobs-track mt-12 lg:mt-8 lg:pt-20" data-jobs-track data-steps-track>
+      <div class="jobs-stage relative" data-jobs-stage data-steps-stage>
+        <div class="jobs-tabs hidden flex-col gap-1" role="tablist" aria-label={j.tabsLabel} aria-orientation="vertical" data-jobs-tabs>
+          {
+            j.items.map((item, i) => (
+              <button
+                type="button"
+                role="tab"
+                id={`job-tab-${item.id}`}
+                aria-controls={`job-${item.id}`}
+                aria-selected={i === 0 ? "true" : "false"}
+                tabindex={i === 0 ? 0 : -1}
+                class="job-tab flex h-11 items-center gap-4 border-l-2 border-line pl-[18px] text-left text-[13px] leading-[17px] font-medium tracking-[0.02em] text-body uppercase transition-colors aria-selected:border-ink aria-selected:text-ink"
+              >
+                <span>{pad(i)}</span>
+                {item.label}
+              </button>
+            ))
+          }
+        </div>
+
+        <div class="jobs-list flex flex-col gap-16">
+          {
+            j.items.map((item, i) => (
+              <article id={`job-${item.id}`} class="job flex flex-col gap-6" aria-labelledby={`job-title-${item.id}`} data-job data-step={i} data-step-panel data-active={i === 0 ? "" : undefined}>
+                <div class="job-text max-w-[620px]">
+                  <h3 id={`job-title-${item.id}`} class="text-h3 font-medium text-ink">{item.title}</h3>
+                  <p class="mt-2 text-lead text-muted">{item.description}</p>
+                </div>
+                <div class="job-card overflow-hidden rounded-card p-5 sm:p-10">
+                  <div class="flex items-center justify-between gap-3">
+                    <p class="flex items-center gap-3 text-sm leading-[18px] font-medium tracking-[0.02em] text-ink uppercase">
+                      <span class="h-4 w-0.5 bg-ink" aria-hidden="true" />
+                      {pad(i)} {item.label}
+                    </p>
+                    <p class="flex items-center gap-2 rounded-full bg-canvas px-3 py-1.5 text-[13px] leading-[17px] text-ink">
+                      <span class="size-1.5 rounded-full bg-[#6bb1ff]" aria-hidden="true" />
+                      {j.live}
+                    </p>
+                  </div>
+                  <div class="job-visual relative mt-7 h-[calc(383px*var(--vs))]" aria-hidden="true" data-job-visual>
+                    <div class="absolute top-0 left-0 origin-top-left scale-(--vs)">
+                      <JobVisual id={item.id} />
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .job-card {
+    background:
+      radial-gradient(42% 42% at 50% 48%, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.35) 60%, rgb(255 255 255 / 0)),
+      radial-gradient(45% 75% at 0% 100%, #7baff9, rgb(158 197 250 / 0.7) 45%, rgb(200 222 251 / 0)),
+      radial-gradient(50% 60% at 55% 105%, #7fd3cb, rgb(171 228 221 / 0.6) 50%, rgb(208 240 234 / 0)),
+      radial-gradient(45% 70% at 0% 0%, #9ce1de, rgb(190 234 230 / 0.7) 50%, rgb(221 243 239 / 0)),
+      radial-gradient(55% 90% at 100% 35%, #e0eea0, rgb(232 243 194 / 0.75) 50%, rgb(240 247 222 / 0)),
+      #ecf7f1;
+  }
+  /* Mock-up scale – refined by the script to fit the card exactly. */
+  [data-jobs] {
+    --vs: 0.37;
+  }
+  @media (min-width: 640px) {
+    [data-jobs] {
+      --vs: 0.7;
+    }
+  }
+  @media (min-width: 768px) {
+    [data-jobs] {
+      --vs: 0.85;
+    }
+  }
+
+  /* Tab mode (desktop with JS): tabs left, one job at a time. */
+  @media (min-width: 1024px) {
+    [data-jobs][data-tabs] .jobs-tabs {
+      display: flex;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 300px;
+    }
+    [data-jobs][data-tabs] .jobs-list {
+      display: grid;
+    }
+    [data-jobs][data-tabs] .job {
+      grid-area: 1 / 1;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      align-items: start;
+      gap: 32px;
+      transition:
+        opacity 0.4s ease,
+        visibility 0.4s;
+    }
+    [data-jobs][data-tabs] .job:not([data-active]) {
+      opacity: 0;
+      visibility: hidden;
+    }
+    [data-jobs][data-tabs] .job-text {
+      margin-top: 228px;
+      max-width: 360px;
+    }
+    [data-jobs][data-tabs] .job-card {
+      height: 520px;
+      padding: 40px;
+    }
+  }
+  @media (min-width: 1280px) {
+    [data-jobs][data-tabs] .jobs-tabs {
+      width: 404px;
+    }
+    [data-jobs][data-tabs] .job {
+      grid-template-columns: 404px minmax(0, 1fr);
+      gap: 48px;
+    }
+  }
+  /* Scroll mode: the stage sticks while the four jobs switch (500px each). */
+  @media (min-width: 1024px) {
+    [data-jobs][data-scroll] .jobs-track {
+      height: calc(80px + 520px + 1500px);
+    }
+    [data-jobs][data-scroll] .jobs-stage {
+      position: sticky;
+      top: calc(var(--spacing-nav) + 78px);
+    }
+  }
+
+  /* Entrance of the mock-up pieces when a job becomes active (Framer: scale 0.96 card, rows from −10px, pills from 0.6). */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) [data-job]:not([data-active]) .job-visual {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    :global(html.js) [data-job]:not([data-active]) :global([data-ji]) {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    :global(html.js) [data-job]:not([data-active]) :global([data-jp]) {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    .job-visual {
+      transition:
+        opacity 0.5s ease-out,
+        transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    [data-job] :global([data-ji]),
+    [data-job] :global([data-jp]) {
+      transition:
+        opacity 0.45s ease-out var(--jd, 0s),
+        transform 0.6s cubic-bezier(0.3, 1.25, 0.5, 1) var(--jd, 0s);
+    }
+    [data-job] :global(.job-bars > span) {
+      animation: job-bar 0.9s ease-in-out calc(var(--i) * -0.13s) infinite alternate;
+    }
+  }
+  @keyframes job-bar {
+    from {
+      transform: scaleY(0.4);
+    }
+  }
+</style>
+
+<script>
+  import { initSteps } from "./steps";
+
+  const section = document.querySelector<HTMLElement>("[data-jobs]");
+  if (section) {
+    // Stagger the pieces of each mock-up.
+    section.querySelectorAll<HTMLElement>("[data-job]").forEach((panel) => {
+      panel.querySelectorAll<HTMLElement>("[data-ji]").forEach((el, i) => el.style.setProperty("--jd", `${0.1 + i * 0.07}s`));
+      panel.querySelectorAll<HTMLElement>("[data-jp]").forEach((el, i) => el.style.setProperty("--jd", `${0.35 + i * 0.08}s`));
+    });
+    // Scale the 748×383 mock-ups to their card.
+    const ro = new ResizeObserver((entries) => {
+      for (const e of entries) (e.target as HTMLElement).style.setProperty("--vs", String(Math.min(1, e.contentRect.width / 748)));
+    });
+    section.querySelectorAll<HTMLElement>("[data-job-visual]").forEach((el) => ro.observe(el));
+    initSteps(section, 500);
+  }
+</script>

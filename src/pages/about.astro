@@ -1,0 +1,21 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import CtaBand from "@/components/sections/CtaBand.astro";
+import AboutHero from "@/components/about/AboutHero.astro";
+import Story from "@/components/about/Story.astro";
+import Values from "@/components/about/Values.astro";
+import History from "@/components/about/History.astro";
+import TrustedBy from "@/components/about/TrustedBy.astro";
+import Press from "@/components/about/Press.astro";
+import { meta } from "@/config/pages/about";
+---
+
+<BaseLayout title={meta.title} description={meta.description}>
+  <AboutHero />
+  <Story />
+  <Values />
+  <History />
+  <TrustedBy />
+  <Press />
+  <CtaBand />
+</BaseLayout>

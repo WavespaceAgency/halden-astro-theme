@@ -1,0 +1,27 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import CtaBand from "@/components/sections/CtaBand.astro";
+import Faq from "@/components/sections/Faq.astro";
+import Channels from "@/components/platform/Channels.astro";
+import Features from "@/components/platform/Features.astro";
+import HowItWorks from "@/components/platform/HowItWorks.astro";
+import Integrations from "@/components/platform/Integrations.astro";
+import PlatformHero from "@/components/platform/PlatformHero.astro";
+import Setup from "@/components/platform/Setup.astro";
+import Testimonials from "@/components/platform/Testimonials.astro";
+import TextFx from "@/components/platform/TextFx.astro";
+import { faq, meta } from "@/config/pages/platform";
+---
+
+<BaseLayout title={meta.title} description={meta.description}>
+  <PlatformHero />
+  <HowItWorks />
+  <Features />
+  <Integrations />
+  <Setup />
+  <Channels />
+  <Testimonials />
+  <Faq content={faq} />
+  <CtaBand />
+  <TextFx />
+</BaseLayout>

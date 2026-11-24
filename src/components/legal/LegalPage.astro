@@ -1,0 +1,65 @@
+---
+import { render, type CollectionEntry } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Container from "@/components/ui/Container.astro";
+import TocSpy from "@/components/mdx/TocSpy.astro";
+import TextEffects from "@/components/ui/TextEffects.astro";
+import { meshBackground } from "@/components/demo/mesh";
+import { legalPage } from "@/config/pages/legal";
+import { formatDate } from "@/lib/content";
+import { legalMdx } from "./index";
+
+interface Props {
+  entry: CollectionEntry<"legal">;
+}
+
+/**
+ * Shared layout for the Privacy Policy and Terms of Service: gradient header,
+ * sticky "Contents" list (highlights the section in view) and the MDX text.
+ */
+const { entry } = Astro.props;
+const { title, description, updated } = entry.data;
+const { Content, headings } = await render(entry);
+const sections = headings.filter((h) => h.depth === 2);
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="flex flex-col items-center gap-4 px-4 py-14 text-center sm:py-[90px]" style={`background: ${meshBackground}`}>
+    <h1 class="text-display leading-[1.05] font-medium tracking-[-0.035em] text-ink-2" data-split="chars">{title}</h1>
+    <p class="text-[15px] leading-5 font-medium text-body">
+      {legalPage.updatedPrefix} <time datetime={updated}>{formatDate(updated, "long")}</time>
+    </p>
+  </section>
+
+  <section class="pt-10 pb-20 lg:pt-[72px] lg:pb-[120px]">
+    <Container class="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-24">
+      {
+        sections.length > 0 && (
+          <nav aria-labelledby="legal-contents" class="rounded-[20px] bg-surface p-5 sm:p-6 lg:sticky lg:top-[calc(var(--spacing-nav)+24px)] lg:w-[300px] lg:shrink-0">
+            <p id="legal-contents" class="mb-4 font-mono text-xs leading-4 font-medium tracking-[0.08em] text-body uppercase">
+              {legalPage.contentsTitle}
+            </p>
+            <ul class="flex flex-col gap-1">
+              {sections.map((h) => (
+                <li>
+                  <a
+                    href={`#${h.slug}`}
+                    data-toc-link
+                    class="flex min-h-9 items-center rounded-[10px] px-2.5 py-2 text-[15px] leading-5 text-body transition-colors hover:bg-sky-tint/60 hover:text-ink-2 aria-[current=location]:bg-sky-tint aria-[current=location]:font-medium aria-[current=location]:text-ink-2"
+                  >
+                    {h.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )
+      }
+      <article class="min-w-0 lg:w-[760px]">
+        <Content components={legalMdx} />
+      </article>
+    </Container>
+  </section>
+  <TocSpy />
+  <TextEffects />
+</BaseLayout>

@@ -1,0 +1,116 @@
+---
+import { postPage } from "@/config/pages/blog";
+import { formatDate, type Post } from "@/lib/content";
+import { cn } from "@/lib/utils";
+import AuthorAvatar from "./AuthorAvatar.astro";
+
+interface Props {
+  post: Post;
+  /** Absolute URL of the post (for the share links). */
+  url: string;
+  /** Sections for "On this page" (h2 headings of the post). */
+  headings: { slug: string; text: string }[];
+}
+
+/**
+ * Left column of a post: "On this page" (desktop only, highlights the section in view),
+ * share links and the author. Sticky on desktop.
+ */
+const { post, url, headings } = Astro.props;
+const { data } = post;
+const p = postPage;
+const fill = (href: string) => href.replace("{url}", encodeURIComponent(url)).replace("{title}", encodeURIComponent(data.title));
+const label = "font-mono text-xs leading-4 font-medium tracking-[0.08em] text-body uppercase";
+---
+
+<aside class="flex flex-col lg:sticky lg:top-[calc(var(--spacing-nav)+24px)] lg:w-[264px] lg:shrink-0 lg:self-start">
+  {
+    headings.length > 0 && (
+      <nav aria-labelledby="toc-title" class="hidden flex-col gap-3.5 lg:flex">
+        <p id="toc-title" class={label}>
+          {p.tocTitle}
+        </p>
+        <ul class="flex flex-col gap-3.5">
+          {headings.map((h) => (
+            <li>
+              <a
+                href={`#${h.slug}`}
+                data-toc-link
+                class="flex min-h-8 items-center border-l-2 border-ink-2/12 py-1.5 pl-3 text-[15px] leading-5 text-body transition-colors hover:text-ink-2 aria-[current=location]:border-brand aria-[current=location]:font-medium aria-[current=location]:text-ink-2"
+              >
+                {h.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )
+  }
+
+  <div class={cn("flex flex-col gap-3", headings.length > 0 && "lg:mt-3.5 lg:pt-6")}>
+    <p class={label}>{p.shareTitle}</p>
+    <ul class="flex gap-2">
+      {
+        p.share.map((s) => (
+          <li>
+            <a
+              href={fill(s.href)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={s.name}
+              class="flex size-11 items-center justify-center rounded-full border border-line bg-surface text-sm leading-[18px] font-medium text-ink-2 transition-colors hover:bg-sky-tint lg:size-10 lg:border-transparent"
+            >
+              {s.label}
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <button
+          type="button"
+          aria-label={p.copyLink.name}
+          data-copy-link={url}
+          data-copied-label={p.copyLink.copied}
+          class="flex size-11 items-center justify-center rounded-full border border-line bg-surface text-ink-2 transition-colors hover:bg-sky-tint lg:size-10 lg:border-transparent"
+        >
+          <svg class="size-3" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M3 9 9 3M4 3h5v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <span class="sr-only" aria-live="polite" data-copy-status></span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="mt-6 flex flex-col gap-3 border-t border-[#dfe0e0] pt-6 lg:mt-3.5">
+    <p class={label}>{p.authorTitle}</p>
+    <div class="flex items-center gap-4">
+      <AuthorAvatar author={data.author} size={40} class="bg-violet-tint" />
+      <div class="flex flex-col gap-0.5">
+        <p class="text-base leading-[21px] font-medium text-ink-2">{data.author.name}</p>
+        <p class="text-sm leading-[18px] text-body">
+          <time datetime={data.date}>{formatDate(data.date)}</time> · {data.readingTime}
+        </p>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>("[data-copy-link]").forEach((button) => {
+    const status = button.parentElement?.querySelector("[data-copy-status]");
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copyLink ?? location.href);
+        if (status) status.textContent = button.dataset.copiedLabel ?? "";
+        button.classList.add("bg-sky-tint");
+        setTimeout(() => {
+          button.classList.remove("bg-sky-tint");
+          if (status) status.textContent = "";
+        }, 2000);
+      } catch {
+        window.prompt("", button.dataset.copyLink ?? location.href);
+      }
+    });
+  });
+</script>

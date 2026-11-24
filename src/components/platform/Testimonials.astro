@@ -1,0 +1,36 @@
+---
+import Container from "@/components/ui/Container.astro";
+import SectionHeading from "@/components/ui/SectionHeading.astro";
+import { testimonials } from "@/config/pages/platform";
+import Avatar from "./Avatar.astro";
+
+/** Results: three customer quotes on the navy band (Figma 1440×633). */
+---
+
+<section class="bg-ink py-20 lg:py-[120px]">
+  <Container>
+    <div data-fx-auto>
+      <SectionHeading {...testimonials.heading} theme="light" class="[&>p:first-child]:!mb-4" />
+    </div>
+    <ul class="mt-12 grid gap-4 lg:mt-16 lg:grid-cols-3">
+      {
+        testimonials.items.map((t) => (
+          <li>
+            <figure class="flex h-full flex-col justify-between gap-8 rounded-[20px] bg-white/6 p-6 sm:p-10">
+              <blockquote class="text-h4 leading-[1.2] font-medium tracking-[-0.015em] text-canvas" data-fx="words">
+                <p>{t.quote}</p>
+              </blockquote>
+              <figcaption class="flex items-center gap-3">
+                <Avatar src={t.avatar} size={40} />
+                <span class="flex flex-col gap-0.5">
+                  <span class="text-[15px] leading-5 font-medium text-canvas">{t.name}</span>
+                  <span class="text-[13px] leading-[17px] text-[#dcebff]">{t.role}</span>
+                </span>
+              </figcaption>
+            </figure>
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
+</section>

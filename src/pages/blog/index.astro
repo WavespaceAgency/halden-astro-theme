@@ -1,0 +1,21 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import BlogHero from "@/components/blog/BlogHero.astro";
+import BlogPosts from "@/components/blog/BlogPosts.astro";
+import CtaBand from "@/components/sections/CtaBand.astro";
+import TextEffects from "@/components/ui/TextEffects.astro";
+import { blogPage } from "@/config/pages/blog";
+import { getPosts } from "@/lib/content";
+
+const posts = await getPosts();
+// The two newest featured posts go in the hero (falls back to the two newest posts).
+const featured = posts.filter((p) => p.data.featured).slice(0, 2);
+const heroPosts = featured.length === 2 ? featured : posts.slice(0, 2);
+---
+
+<BaseLayout title={blogPage.seo.title} description={blogPage.seo.description}>
+  <BlogHero posts={heroPosts} />
+  <BlogPosts posts={posts} />
+  <CtaBand />
+  <TextEffects />
+</BaseLayout>

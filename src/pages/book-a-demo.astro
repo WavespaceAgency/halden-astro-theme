@@ -1,0 +1,19 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Container from "@/components/ui/Container.astro";
+import DemoForm from "@/components/demo/DemoForm.astro";
+import DemoIntro from "@/components/demo/DemoIntro.astro";
+import { meshBackground } from "@/components/demo/mesh";
+import TextEffects from "@/components/ui/TextEffects.astro";
+import { bookDemo } from "@/config/pages/book-a-demo";
+---
+
+<BaseLayout title={bookDemo.seo.title} description={bookDemo.seo.description}>
+  <section class="py-12 sm:py-16 lg:py-[120px]" style={`background: ${meshBackground}`}>
+    <Container class="flex flex-col gap-12 xl:flex-row xl:items-start xl:gap-20">
+      <DemoIntro />
+      <DemoForm />
+    </Container>
+  </section>
+  <TextEffects />
+</BaseLayout>

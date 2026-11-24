@@ -1,0 +1,10 @@
+---
+import { getEntry } from "astro:content";
+import LegalPage from "@/components/legal/LegalPage.astro";
+
+/** Text: src/content/legal/privacy.mdx */
+const entry = await getEntry("legal", "privacy");
+if (!entry) throw new Error("Missing src/content/legal/privacy.mdx");
+---
+
+<LegalPage entry={entry} />

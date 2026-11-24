@@ -1,0 +1,125 @@
+---
+import Container from "@/components/ui/Container.astro";
+import SectionIntro from "@/components/security/SectionIntro.astro";
+import { compare } from "@/config/pages/pricing";
+import { cn } from "@/lib/utils";
+
+/**
+ * Figma "Compare" (1440×1290): plan comparison table. A real <table>; on narrow
+ * screens it scrolls sideways inside its card (like Framer) with the feature column pinned.
+ */
+const c = compare;
+const featured = c.plans.map((plan) => Boolean(plan.featured));
+const col = (i: number) => (featured[i] ? "bg-[rgb(200_222_251/0.28)]" : "");
+---
+
+<section class="bg-canvas-2 py-20 lg:py-[120px]" aria-labelledby="compare-title">
+  <Container>
+    <SectionIntro id="compare-title" eyebrow={c.eyebrow} title={c.title} />
+
+    <div class="compare-scroll relative mt-12 overflow-x-auto rounded-card bg-surface lg:mt-16" tabindex="0" role="region" aria-labelledby="compare-title">
+      <table class="w-full min-w-[680px] border-collapse text-left md:min-w-0">
+        <caption class="sr-only">{c.title}</caption>
+        <colgroup>
+          <col class="w-[34%] md:w-[33.65%]" />
+          {c.plans.map(() => <col class="w-[22.115%]" />)}
+        </colgroup>
+        <thead>
+          <tr>
+            <td class="compare-sticky bg-surface px-4 pt-8 pb-7 align-bottom sm:pl-8">
+              <p class="text-h4 leading-[26px] font-medium tracking-[-0.01em] text-ink">{c.intro.title}</p>
+              <p class="mt-1.5 text-base leading-6 text-muted" data-split="words">{c.intro.text}</p>
+            </td>
+            {
+              c.plans.map((plan, i) => (
+                <th scope="col" class={cn("px-2 pt-8 pb-7 align-bottom font-normal", col(i))}>
+                  <div class="flex flex-col items-center gap-3.5 text-center">
+                    <p class="flex items-center gap-2">
+                      <span class="text-h4 leading-[26px] font-medium tracking-[-0.01em] text-ink">{plan.name}</span>
+                      {plan.badge && (
+                        <span class="compare-badge rounded-full px-2.5 py-1 font-mono text-[11px] leading-[14px] font-medium tracking-[0.06em] text-white uppercase">
+                          {plan.badge}
+                        </span>
+                      )}
+                    </p>
+                    <p class="flex flex-col items-center gap-0.5">
+                      <span class="text-[28px] leading-9 font-medium tracking-[-0.015em] text-ink">{plan.price}</span>
+                      <span class="text-sm leading-[18px] text-muted">{plan.note}</span>
+                    </p>
+                    <a
+                      href={plan.cta.href}
+                      class={cn(
+                        "inline-flex min-h-11 items-center justify-center rounded-button px-[18px] text-[15px] leading-5 font-medium whitespace-nowrap transition-[background-color,transform] duration-150 active:scale-[0.97]",
+                        plan.featured ? "bg-brand text-canvas hover:bg-brand-hover" : "border border-ink text-ink hover:bg-canvas-2",
+                      )}
+                    >
+                      {plan.cta.label}
+                    </a>
+                  </div>
+                </th>
+              ))
+            }
+          </tr>
+        </thead>
+        {
+          c.groups.map((group) => (
+            <tbody>
+              <tr>
+                <th
+                  scope="colgroup"
+                  colspan={c.plans.length + 1}
+                  class="border-t border-line bg-canvas-2 px-4 py-3.5 font-mono text-xs leading-4 font-semibold tracking-[0.06em] text-ink-2 uppercase sm:px-8"
+                >
+                  <span class="compare-sticky-text">{group.title}</span>
+                </th>
+              </tr>
+              {group.rows.map((row) => (
+                <tr class="border-t border-line">
+                  <th scope="row" class="compare-sticky bg-surface px-4 py-[18px] text-base leading-[21px] font-normal text-body sm:pl-8">
+                    {row.label}
+                  </th>
+                  {row.values.map((value, i) => (
+                    <td class={cn("px-2 py-[18px] text-center text-base leading-[21px] font-medium text-ink", col(i))}>
+                      {value === true ? (
+                        <svg class="mx-auto size-6" viewBox="0 0 24 24" fill="none" role="img" aria-label={c.labels.included}>
+                          <rect width="24" height="24" rx="12" fill="var(--brand)" />
+                          <path d="M7 12.25 10.5 15.75 17 8.25" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                      ) : value === false ? (
+                        <span class="mx-auto flex size-6 items-center justify-center">
+                          <span class="h-0.5 w-3 rounded-[1px] bg-[#9ca3aa]" aria-hidden="true" />
+                          <span class="sr-only">{c.labels.notIncluded}</span>
+                        </span>
+                      ) : (
+                        value
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          ))
+        }
+      </table>
+    </div>
+  </Container>
+</section>
+
+<style>
+  .compare-badge {
+    background: linear-gradient(90deg, #3a61cf 0%, #6372df 45%, #9780da 75%, #c08ecf 100%);
+  }
+  /* Pinned feature column while the table scrolls sideways (phones). */
+  @media (max-width: 767px) {
+    .compare-sticky {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      box-shadow: 1px 0 0 var(--line);
+    }
+    .compare-sticky-text {
+      position: sticky;
+      left: 16px;
+    }
+  }
+</style>

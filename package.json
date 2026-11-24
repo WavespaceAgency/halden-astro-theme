@@ -1,0 +1,44 @@
+{
+  "name": "halden-astro-theme",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Halden – a free, open-source Astro theme for healthcare and AI SaaS websites: 11 pages, Tailwind CSS, MDX blog, fast and accessible.",
+  "license": "MIT",
+  "author": "Wavespace",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check"
+  },
+  "keywords": [
+    "astro",
+    "astro-theme",
+    "template",
+    "tailwindcss",
+    "healthcare",
+    "saas",
+    "landing-page",
+    "startup",
+    "mdx",
+    "blog"
+  ],
+  "dependencies": {
+    "@astrojs/mdx": "^8.1.6",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.6",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
+    "@tailwindcss/vite": "^4.3.5",
+    "astro": "^7.4.13",
+    "tailwindcss": "^4.3.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "typescript": "^6.0.3"
+  }
+}

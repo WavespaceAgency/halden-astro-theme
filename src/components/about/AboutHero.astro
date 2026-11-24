@@ -1,0 +1,56 @@
+---
+import Button from "@/components/ui/Button.astro";
+import PlayIcon from "@/components/ui/PlayIcon.astro";
+import SplitText from "./SplitText.astro";
+import { hero } from "@/config/pages/about";
+
+/**
+ * About hero (Figma "Hero / Content", 1440×700): centred two-tone heading on a soft
+ * teal / lime / blue mesh. Letters pop in, the paragraph words un-blur (Framer text effects).
+ */
+---
+
+<section class="about-hero relative overflow-hidden">
+  <div class="mx-auto flex max-w-[928px] flex-col items-center px-4 pt-14 pb-20 text-center sm:px-6 sm:pt-24 sm:pb-28 lg:px-6 lg:py-[176px]">
+    <SplitText
+      as="h1"
+      mode="chars"
+      trigger="load"
+      delay={0.1}
+      stagger={0.03}
+      class="text-[clamp(2.75rem,1.78rem+4.13vw,5.5rem)] leading-[1.02] font-normal tracking-[-0.045em] text-subtle lg:tracking-[-0.055em]"
+      text={[
+        { text: hero.titleMuted },
+        { text: hero.title, class: "font-medium text-ink-2", break: true },
+      ]}
+    />
+    <SplitText
+      text={hero.description}
+      mode="words"
+      trigger="load"
+      delay={0.35}
+      stagger={0.025}
+      class="mt-5 max-w-[670px] text-lg leading-[30px] text-body sm:text-xl sm:leading-8"
+    />
+    <div class="hero-reveal mt-8 flex w-full flex-wrap justify-center gap-3 max-sm:grid max-sm:grid-cols-2" style="--delay: 0.6s">
+      <Button href={hero.primary.href} size="xl" class="shadow-none">{hero.primary.label}</Button>
+      <Button href={hero.secondary.href} variant="outline" size="xl" class="rounded-[18px] border-ink-2/25 bg-white/20 text-ink hover:bg-white/50">
+        <PlayIcon />
+        {hero.secondary.label}
+      </Button>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Figma mesh: five radial glows over a pale mint base (top layer first). */
+  .about-hero {
+    background:
+      radial-gradient(42% 42% at 50% 48%, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.35) 60%, rgb(255 255 255 / 0)),
+      radial-gradient(45% 75% at 0% 100%, rgb(123 175 249), rgb(158 197 250 / 0.7) 45%, rgb(200 222 251 / 0)),
+      radial-gradient(50% 60% at 55% 105%, rgb(127 211 203), rgb(171 228 221 / 0.6) 50%, rgb(208 240 234 / 0)),
+      radial-gradient(45% 70% at 0% 0%, rgb(156 225 222), rgb(190 234 230 / 0.7) 50%, rgb(221 243 239 / 0)),
+      radial-gradient(55% 90% at 100% 35%, rgb(224 238 160), rgb(232 243 194 / 0.75) 50%, rgb(240 247 222 / 0)),
+      #ecf7f1;
+  }
+</style>

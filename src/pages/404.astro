@@ -1,0 +1,34 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import TextEffects from "@/components/ui/TextEffects.astro";
+import { notFound } from "@/config/pages/not-found";
+import { buttonClasses } from "@/lib/button";
+
+/** 404 – "This page missed its appointment". Text: src/config/pages/not-found.ts */
+const n = notFound;
+---
+
+<BaseLayout title={n.seo.title} description={n.seo.description} noindex>
+  <section
+    class="flex flex-col items-center gap-6 px-4 py-20 text-center sm:py-[120px]"
+    style="background: radial-gradient(55.6% 41.7% at 50% 58.3%, var(--sky-soft), #eff5fe 45%, var(--canvas) 100%)"
+  >
+    <p
+      class="hero-reveal bg-linear-to-b from-ink-2 to-brand bg-clip-text text-[140px] leading-[0.9] font-medium tracking-[-0.06em] text-transparent sm:text-[200px] lg:text-[240px]"
+      aria-hidden="true"
+    >
+      {n.code}
+    </p>
+    <div class="flex max-w-[598px] flex-col items-center gap-8">
+      <div class="flex flex-col items-center gap-3">
+        <h1 class="text-[32px] leading-[1.3] font-medium tracking-[-0.025em] text-ink-2 sm:text-[40px]" data-split="chars">{n.title}</h1>
+        <p class="max-w-[436px] text-lead text-body" data-split="words">{n.description}</p>
+      </div>
+      <div class="hero-reveal flex flex-wrap justify-center gap-3 pt-2" style="--delay: 0.4s">
+        <a href={n.primary.href} class={buttonClasses({ size: "xl", className: "shadow-none" })}>{n.primary.label}</a>
+        <a href={n.secondary.href} class={buttonClasses({ variant: "outline", size: "xl", className: "border-ink! bg-transparent!" })}>{n.secondary.label}</a>
+      </div>
+    </div>
+  </section>
+  <TextEffects />
+</BaseLayout>

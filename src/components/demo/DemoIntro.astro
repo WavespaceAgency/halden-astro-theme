@@ -1,0 +1,40 @@
+---
+import { bookDemo } from "@/config/pages/book-a-demo";
+import CheckIcon from "./CheckIcon.astro";
+
+/** Left column: heading, benefits and the "Trusted by" clinic names. */
+const d = bookDemo;
+---
+
+<div class="flex flex-col gap-8 lg:gap-10 xl:w-[568px] xl:shrink-0">
+  <div class="flex flex-col gap-5">
+    <h1 class="text-display leading-[1.06] font-medium tracking-[-0.035em] whitespace-pre-line text-ink" data-split="chars">
+      {d.title}<span class="text-muted">{d.titleMuted}</span>
+    </h1>
+    <p class="max-w-[420px] text-lead text-body" data-split="words">{d.description}</p>
+  </div>
+
+  <ul class="flex flex-col gap-3.5" data-stagger>
+    {
+      d.benefits.map((item) => (
+        <li class="flex items-center gap-3 text-[17px] leading-[22px] font-medium text-ink">
+          <CheckIcon class="size-6 shrink-0" />
+          {item}
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="flex flex-col gap-4 border-t border-black/16 pt-8">
+    <p class="font-mono text-xs leading-4 font-semibold tracking-[0.08em] text-ink-2 uppercase">{d.logos.title}</p>
+    <ul class="grid grid-cols-2 gap-3 sm:grid-cols-4" data-stagger>
+      {
+        d.logos.items.map((name) => (
+          <li class="flex min-h-[52px] items-center justify-center rounded-[14px] bg-surface px-2 text-center text-sm leading-[18px] font-medium tracking-[-0.01em] text-body">
+            {name}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</div>

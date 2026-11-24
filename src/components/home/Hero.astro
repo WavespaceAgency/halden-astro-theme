@@ -1,0 +1,151 @@
+---
+import { Image } from "astro:assets";
+import Container from "@/components/ui/Container.astro";
+import PlayIcon from "@/components/ui/PlayIcon.astro";
+import { getImage } from "@/lib/images";
+import { hero } from "@/config/pages/home";
+import HeroFlow from "./HeroFlow.astro";
+
+/**
+ * Home hero (Figma "V.3 Hero", 1440×1208 incl. header): dark photo card with
+ * the two-line heading, animated waveform, buttons and the flow diagram.
+ */
+
+/** Waveform bars from Figma: [height, colour]. They pulse in CSS (see <style>). */
+const bars: [number, string][] = [
+  [4, "#2c67f6"], [8, "#2c67f6"], [14, "#2c67f6"], [10, "#4884f7"], [20, "#4884f7"], [26, "#4884f7"],
+  [16, "#64a0f8"], [22, "#64a0f8"], [12, "#6dcde3"], [18, "#6dcde3"], [24, "#6dcde3"], [10, "#6eddc5"],
+  [6, "#6eddc5"], [12, "#6eddc5"], [8, "#aadf6f"], [4, "#aadf6f"],
+];
+---
+
+<section class="pb-10 sm:pb-16 lg:pb-[165px]" aria-labelledby="hero-title">
+  <Container size="wide" class="px-3 sm:px-6">
+    <div class="relative isolate overflow-hidden rounded-card bg-ink-2 px-5 pt-12 pb-8 sm:px-10 sm:pt-14 md:pb-[max(2rem,calc(72px*var(--flow-s)))] lg:px-16 lg:pt-16" data-hero-card="">
+      <Image
+        src={getImage(hero.image)}
+        alt=""
+        widths={[640, 1024]}
+        sizes="(min-width: 1440px) 1376px, 100vw"
+        loading="eager"
+        fetchpriority="high"
+        class="hero-photo absolute inset-0 -z-20 size-full object-cover"
+      />
+      <div class="hero-overlay absolute inset-x-0 -top-[60px] bottom-0 -z-10" aria-hidden="true"></div>
+
+      <div class="max-w-[760px]">
+        <h1 id="hero-title" class="text-display font-medium text-white" data-split="chars">
+          {hero.titleStart}{" "}<span class="hero-wave" aria-hidden="true">{bars.map(([h, c], i) => <span style={`--h:${h}px;--c:${c};--i:${i}`} />)}</span>{" "}{hero.titleEnd}<br />{hero.titleLine2}
+        </h1>
+        <p class="mt-5 max-w-[663px] text-lead text-white/82" data-split="words">{hero.description}</p>
+        <div class="mt-8 flex flex-wrap gap-3 sm:mt-[35px]">
+          <a
+            href={hero.primary.href}
+            class="hero-btn min-h-[52px] flex-1 rounded-[18px] bg-[#3465e8] px-5 sm:px-6 text-base leading-[21px] shadow-[0_8px_28px_0_rgb(123_175_249/0.45)] hover:scale-[1.02] sm:flex-none"
+          >
+            {hero.primary.label}
+          </a>
+          <a
+            href={hero.secondary.href}
+            class="hero-btn min-h-[52px] px-5 sm:px-6 leading-6 flex-1 rounded-[18px] border border-white/17 bg-white/8 text-base text-canvas backdrop-blur-none hover:bg-white/14 sm:flex-none"
+          >
+            <PlayIcon />
+            {hero.secondary.label}
+          </a>
+        </div>
+      </div>
+
+      <HeroFlow />
+    </div>
+  </Container>
+</section>
+
+<style>
+  [data-hero-card] {
+    --flow-s: 0.5;
+  }
+  @media (min-width: 1024px) {
+    [data-hero-card] {
+      --flow-s: 0.66;
+    }
+  }
+  @media (min-width: 1280px) {
+    [data-hero-card] {
+      --flow-s: 0.85;
+    }
+  }
+  @media (min-width: 1440px) {
+    [data-hero-card] {
+      --flow-s: 1;
+    }
+  }
+  /* Hero buttons (Figma: 52px high, 18px radius, 16px text) */
+  .hero-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+    color: #fff;
+    transition:
+      background-color 0.15s,
+      scale 0.15s;
+  }
+  .hero-photo {
+    /* Figma image adjustments: exposure −0.25, contrast +0.15, saturation −0.6 */
+    filter: brightness(0.8) contrast(1.15) saturate(0.4);
+  }
+  .hero-overlay {
+    background:
+      linear-gradient(90deg, rgb(5 16 30 / 0.55), rgb(5 16 30 / 0.2) 40%, rgb(5 16 30 / 0) 65%),
+      radial-gradient(35% 45% at 35% 100%, rgb(87 191 179 / 0.35), rgb(87 191 179 / 0.1) 55%, rgb(87 191 179 / 0)),
+      radial-gradient(40% 50% at 78% 95%, rgb(118 93 246 / 0.45), rgb(118 93 246 / 0.15) 50%, rgb(118 93 246 / 0)),
+      radial-gradient(45% 60% at 92% 12%, rgb(44 103 246 / 0.55), rgb(44 103 246 / 0.2) 50%, rgb(44 103 246 / 0)),
+      linear-gradient(180deg, rgb(12 26 47 / 0.55), rgb(12 26 47 / 0.35) 50%, rgb(5 16 30 / 0.6));
+  }
+
+  /* Waveform between "Patient calls" and "handled" (hidden on phones, like Framer). */
+  .hero-wave {
+    display: none;
+  }
+  @media (min-width: 768px) {
+    .hero-wave {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      width: 112px;
+      height: 28px;
+      margin: 0 0.06em 0 0.35em;
+      vertical-align: 0.12em;
+      scale: var(--wave-s, 1);
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1279px) {
+    .hero-wave {
+      --wave-s: 0.8;
+      margin-inline: -0.1em -0.25em;
+    }
+  }
+  .hero-wave > span {
+    width: 3px;
+    height: var(--h);
+    flex: none;
+    border-radius: 2px;
+    background: var(--c);
+    box-shadow: 0 0 12px rgb(100 160 248 / 0.6);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-wave > span {
+      animation: hero-bar calc(0.9s + mod(var(--i) * 0.37s, 0.7s)) ease-in-out calc(var(--i) * -0.23s) infinite alternate;
+    }
+  }
+  @keyframes hero-bar {
+    from {
+      transform: scaleY(0.35);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+</style>

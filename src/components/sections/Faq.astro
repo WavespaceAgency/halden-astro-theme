@@ -1,0 +1,94 @@
+---
+import SectionHeading, { type HeadingContent } from "@/components/ui/SectionHeading.astro";
+import Container from "@/components/ui/Container.astro";
+import JsonLd from "@/components/JsonLd.astro";
+import { cn } from "@/lib/utils";
+
+export interface FaqContent {
+  heading: HeadingContent;
+  items: { question: string; answer: string }[];
+}
+
+interface Props {
+  content: FaqContent;
+  /** Open the first question by default (as in Figma). */
+  openFirst?: boolean;
+  /** Add FAQPage JSON-LD (only one FAQ block per page should do this). */
+  schema?: boolean;
+  id?: string;
+  /** Extra classes for the section, e.g. "bg-canvas" to change the background. */
+  class?: string;
+}
+
+/**
+ * FAQ: heading on the left, accordion on the right (Figma "Section / FAQ").
+ * Uses <details>/<summary>, so it works without JavaScript. A small script
+ * animates the height and keeps one item open at a time.
+ */
+const { content, openFirst = true, schema = true, id = "faq", class: className } = Astro.props;
+const faqLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: content.items.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: { "@type": "Answer", text: item.answer },
+  })),
+};
+---
+
+<section id={id} class={cn(!className?.includes("bg-") && "bg-canvas-2", "py-20 lg:py-[120px]", className)}>
+  {schema && <JsonLd data={faqLd} />}
+  <Container class="grid gap-10 lg:grid-cols-[minmax(0,474fr)_minmax(0,710fr)] lg:gap-16">
+    <div data-reveal><SectionHeading {...content.heading} descriptionClass="max-w-[429px]" /></div>
+    <div class="flex flex-col gap-3" data-faq data-stagger>
+      {
+        content.items.map((item, i) => (
+          <details class="group rounded-panel bg-surface" open={openFirst && i === 0} name={`${id}-accordion`}>
+            <summary class="flex list-none items-center gap-6 px-5 py-[22px] sm:px-7 [&::-webkit-details-marker]:hidden">
+              <span class="flex-1 text-h4 font-medium tracking-normal text-ink">{item.question}</span>
+              <span
+                class="relative flex size-7 shrink-0 items-center justify-center rounded-full bg-sky text-ink transition-[background-color,color,rotate] duration-300 group-open:rotate-45 group-open:bg-brand group-open:text-canvas"
+                aria-hidden="true"
+              >
+                <span class="absolute h-[1.5px] w-3 rounded-full bg-current" />
+                <span class="absolute h-3 w-[1.5px] rounded-full bg-current" />
+              </span>
+            </summary>
+            <div data-faq-body class="-mt-2.5 overflow-hidden">
+              <p class="max-w-[602px] px-5 pb-[22px] text-base leading-[26px] text-muted sm:px-7">{item.answer}</p>
+            </div>
+          </details>
+        ))
+      }
+    </div>
+  </Container>
+</section>
+
+<script>
+  // Smooth open/close height animation for the <details> accordion.
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  document.querySelectorAll<HTMLDetailsElement>("[data-faq] details").forEach((details) => {
+    const summary = details.querySelector("summary");
+    const body = details.querySelector<HTMLElement>("[data-faq-body]");
+    if (!summary || !body) return;
+    summary.addEventListener("click", (event) => {
+      if (reduce.matches) return;
+      event.preventDefault();
+      const opening = !details.open;
+      if (opening) {
+        // Close the other open item in the same group (same as the `name` attribute does natively).
+        details.parentElement?.querySelectorAll<HTMLDetailsElement>("details[open]").forEach((other) => {
+          if (other !== details) other.querySelector("summary")?.click();
+        });
+        details.open = true;
+        const h = body.scrollHeight;
+        body.animate({ height: ["0px", `${h}px`], opacity: [0, 1] }, { duration: 320, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
+      } else {
+        const h = body.scrollHeight;
+        const anim = body.animate({ height: [`${h}px`, "0px"], opacity: [1, 0] }, { duration: 260, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
+        anim.onfinish = () => (details.open = false);
+      }
+    });
+  });
+</script>

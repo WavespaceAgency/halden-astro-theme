@@ -1,0 +1,28 @@
+---
+/**
+ * Home page. Text and data: src/config/pages/home.ts. Sections: src/components/home/.
+ */
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import CtaBand from "@/components/sections/CtaBand.astro";
+import Faq from "@/components/sections/Faq.astro";
+import Hero from "@/components/home/Hero.astro";
+import HowItWorks from "@/components/home/HowItWorks.astro";
+import Platform from "@/components/home/Platform.astro";
+import Resolved from "@/components/home/Resolved.astro";
+import Results from "@/components/home/Results.astro";
+import Security from "@/components/home/Security.astro";
+import TextEffects from "@/components/ui/TextEffects.astro";
+import { faq } from "@/config/pages/home";
+---
+
+<BaseLayout>
+  <Hero />
+  <Resolved />
+  <Results />
+  <HowItWorks />
+  <Platform />
+  <Security />
+  <Faq content={faq} />
+  <CtaBand />
+  <TextEffects />
+</BaseLayout>

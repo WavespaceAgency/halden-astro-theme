@@ -1,0 +1,41 @@
+---
+import Eyebrow, { type EyebrowTone } from "@/components/ui/Eyebrow.astro";
+import { cn } from "@/lib/utils";
+
+/**
+ * Centred section heading used on the Security and Pricing pages:
+ * eyebrow + 54px heading (optional muted / accent second part) + description.
+ * The heading letters pop in and the description words un-blur (see components/home/TextEffects.astro).
+ */
+interface Props {
+  eyebrow: { label: string; icon?: string; tone?: EyebrowTone };
+  title: string;
+  /** Second part of the heading in the muted colour. */
+  titleMuted?: string;
+  /** Second part of the heading in the mint accent (dark backgrounds). */
+  titleAccent?: string;
+  description?: string;
+  theme?: "dark" | "light";
+  /** Space between eyebrow and heading (Figma: 12px or 16px). */
+  gap?: "sm" | "md";
+  id?: string;
+  class?: string;
+  descriptionClass?: string;
+}
+
+const { eyebrow, title, titleMuted, titleAccent, description, theme = "dark", gap = "md", id, class: className, descriptionClass } =
+  Astro.props;
+const light = theme === "light";
+/** "\n" in the config = line break (kept as <br> so the letter animation can split the text). */
+const lines = (text: string) => text.split("\n");
+---
+
+<div class={cn("flex flex-col items-center text-center", className)}>
+  <Eyebrow {...eyebrow} theme={theme} class={gap === "sm" ? "mb-3" : "mb-4"} />
+  <h2 id={id} class={cn("text-h1 font-medium text-balance", light ? "text-white" : "text-ink")} data-split="chars">
+    {lines(title).map((line, i) => (i ? [" ", <br />, line] : line))}
+    {titleMuted && <span class="text-subtle">{lines(titleMuted).map((line, i) => (i ? [" ", <br />, line] : line))}</span>}
+    {titleAccent && <span class="text-[#d0ecdf]">{titleAccent}</span>}
+  </h2>
+  {description && <p class={cn("mt-4 text-lead text-muted", descriptionClass ?? "max-w-[620px]")} data-split="words">{description}</p>}
+</div>

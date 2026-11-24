@@ -1,0 +1,58 @@
+---
+import { blogPage } from "@/config/pages/blog";
+import { buttonClasses } from "@/lib/button";
+
+/**
+ * "Get new posts in your inbox" sign-up. Validates the email in the browser and
+ * shows a thank-you message. It does not send anything yet – connect it to your
+ * email tool in the script below (see TODO).
+ */
+const n = blogPage.newsletter;
+---
+
+<div class="flex flex-col gap-6 rounded-card bg-sky-soft p-6 sm:p-10 lg:flex-row lg:items-center lg:justify-between lg:py-10 lg:pr-10 lg:pl-12">
+  <div class="flex flex-col gap-2">
+    <h2 class="text-[28px] leading-[1.3] font-medium tracking-[-0.02em] text-ink sm:text-[32px]">{n.title}</h2>
+    <p class="text-base leading-[21px] text-body">{n.description}</p>
+  </div>
+  <form class="w-full lg:w-[381px]" novalidate data-newsletter>
+    <div class="flex flex-col gap-2 rounded-[18px] bg-surface p-1.5 sm:flex-row sm:items-center sm:pl-5 has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-brand">
+      <label for="newsletter-email" class="sr-only">{n.label}</label>
+      <input
+        id="newsletter-email"
+        name="email"
+        type="email"
+        autocomplete="email"
+        required
+        placeholder={n.placeholder}
+        aria-describedby="newsletter-status"
+        class="min-h-11 w-full min-w-0 flex-1 bg-transparent px-3.5 text-base text-ink placeholder:text-muted focus:outline-none sm:px-0"
+      />
+      <button type="submit" class={buttonClasses({ size: "md", className: "shadow-none!" })}>{n.button}</button>
+    </div>
+    <p id="newsletter-status" class="mt-2 min-h-5 text-sm leading-5 empty:hidden" aria-live="polite" data-newsletter-status></p>
+  </form>
+</div>
+
+<script is:inline define:vars={{ success: n.success, error: n.error }}>
+  document.querySelectorAll("[data-newsletter]").forEach((form) => {
+    const input = form.querySelector("input");
+    const status = form.querySelector("[data-newsletter-status]");
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!input.checkValidity() || !input.value.trim()) {
+        input.setAttribute("aria-invalid", "true");
+        status.textContent = error;
+        status.className = "mt-2 text-sm leading-5 text-[#b42318]";
+        input.focus();
+        return;
+      }
+      input.removeAttribute("aria-invalid");
+      // TODO: send `input.value` to your email tool here (Mailchimp, Buttondown, ConvertKit …).
+      status.textContent = success;
+      status.className = "mt-2 text-sm leading-5 text-ink";
+      form.reset();
+    });
+    input.addEventListener("input", () => input.removeAttribute("aria-invalid"));
+  });
+</script>

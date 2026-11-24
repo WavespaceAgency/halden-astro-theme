@@ -1,0 +1,91 @@
+---
+import SectionHeading from "@/components/ui/SectionHeading.astro";
+import { integrations } from "@/config/pages/platform";
+
+/**
+ * Integrations: heading + two endless rows of integration cards (first row scrolls left, second right),
+ * faded at both edges (Figma 1440×714). Each row holds three copies of its list; only the first copy is
+ * read by screen readers. Speed in px/s comes from the config. Stops with "reduce motion".
+ */
+const darkMarks = new Set(["#2c67f6", "#0c1a2f"]);
+---
+
+<section id={integrations.id} class="scroll-mt-24 bg-canvas py-20 lg:py-[120px]">
+  <div class="px-4 sm:px-6" data-fx-auto>
+    <SectionHeading {...integrations.heading} align="center" class="[&>p:first-child]:!mb-4" descriptionClass="!mt-4 max-w-[546px] !text-muted" />
+  </div>
+
+  <div class="relative mt-12 flex flex-col gap-4 overflow-hidden py-2 lg:mt-16" data-marquee data-speed={integrations.speed}>
+    {
+      integrations.rows.map((row, r) => (
+        <ul
+          class:list={["marquee-row flex w-max gap-4", r === 1 && "marquee-reverse"]}
+          aria-label={integrations.listLabel}
+        >
+          {[0, 1, 2].flatMap((copy) =>
+            row.map((item) => (
+              <li
+                class="flex h-[72px] shrink-0 items-center gap-[14px] rounded-[20px] bg-white py-3 pr-7 pl-3 shadow-[0_2px_8px_0_rgb(12_26_47/0.04)]"
+                aria-hidden={copy > 0 ? "true" : undefined}
+              >
+                <span
+                  class:list={[
+                    "flex size-12 items-center justify-center rounded-[14px] text-xl leading-6 font-medium",
+                    darkMarks.has(item.color) ? "text-white" : "text-ink-2",
+                  ]}
+                  style={`background:${item.color}`}
+                  aria-hidden="true"
+                >
+                  {item.name.charAt(0)}
+                </span>
+                <span class="flex flex-col gap-0.5 whitespace-nowrap">
+                  <span class="text-lg leading-6 font-medium tracking-[-0.01em] text-ink">{item.name}</span>
+                  <span class="text-sm leading-5 text-muted">{item.category}</span>
+                </span>
+              </li>
+            )),
+          )}
+        </ul>
+      ))
+    }
+    <span class="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-canvas to-transparent sm:w-[200px]" aria-hidden="true"></span>
+    <span class="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-canvas to-transparent sm:w-[200px]" aria-hidden="true"></span>
+  </div>
+</section>
+
+<style>
+  @media (prefers-reduced-motion: no-preference) {
+    .marquee-row {
+      /* one copy of the list + one gap = a third of the row plus a third of a gap */
+      animation: marquee-left var(--marquee-duration, 34s) linear infinite;
+    }
+    .marquee-reverse {
+      animation-name: marquee-right;
+      animation-duration: var(--marquee-duration, 31s);
+    }
+  }
+  @keyframes marquee-left {
+    to {
+      transform: translateX(calc(-100% / 3 - 16px / 3));
+    }
+  }
+  @keyframes marquee-right {
+    from {
+      transform: translateX(calc(-100% / 3 - 16px / 3));
+    }
+  }
+</style>
+
+<script>
+  // Match the Framer speed: duration = width of one copy / speed.
+  document.querySelectorAll<HTMLElement>("[data-marquee]").forEach((wrap) => {
+    const speed = Number(wrap.dataset.speed) || 40;
+    const update = () =>
+      wrap.querySelectorAll<HTMLElement>(".marquee-row").forEach((row) => {
+        const cycle = (row.scrollWidth + 16) / 3;
+        row.style.setProperty("--marquee-duration", `${(cycle / speed).toFixed(2)}s`);
+      });
+    update();
+    document.fonts?.ready.then(update);
+  });
+</script>

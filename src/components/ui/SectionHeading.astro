@@ -1,0 +1,47 @@
+---
+import { cn } from "@/lib/utils";
+import Eyebrow, { type EyebrowTone } from "./Eyebrow.astro";
+
+export interface HeadingContent {
+  eyebrow?: { label: string; icon?: string; tone?: EyebrowTone };
+  /** Main heading. Use "\n" for the line breaks from the design. */
+  title: string;
+  /** Optional second part of the heading, shown in the muted colour (Figma two-tone headings). */
+  titleMuted?: string;
+  description?: string;
+}
+
+interface Props extends HeadingContent {
+  align?: "left" | "center";
+  theme?: "dark" | "light";
+  /** Heading level. Use "h1" only once per page. */
+  as?: "h1" | "h2";
+  /** "h1" = 54px, "h2" = 44px (Figma sizes at 1440). */
+  size?: "h1" | "h2";
+  class?: string;
+  descriptionClass?: string;
+}
+
+/** Eyebrow + heading + paragraph block used at the top of most sections. */
+const {
+  eyebrow,
+  title,
+  titleMuted,
+  description,
+  align = "left",
+  theme = "dark",
+  as: Tag = "h2",
+  size = "h1",
+  class: className,
+  descriptionClass,
+} = Astro.props;
+const light = theme === "light";
+---
+
+<div class={cn("flex flex-col", align === "center" ? "items-center text-center" : "items-start", className)}>
+  {eyebrow && <Eyebrow {...eyebrow} theme={theme} class="mb-5" />}
+  <Tag class={cn("font-medium whitespace-pre-line text-balance", size === "h1" ? "text-h1" : "text-h2", light ? "text-canvas" : "text-ink")}>
+    {title}{titleMuted && <span class={light ? "text-white/60" : "text-muted"}>{titleMuted}</span>}
+  </Tag>
+  {description && <p class={cn("mt-5 max-w-[460px] text-lead", light ? "text-canvas" : "text-body", descriptionClass)}>{description}</p>}
+</div>

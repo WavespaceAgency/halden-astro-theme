@@ -1,0 +1,214 @@
+---
+import Button from "@/components/ui/Button.astro";
+import Eyebrow from "@/components/ui/Eyebrow.astro";
+import { security as s } from "@/config/pages/home";
+
+/**
+ * "Security" (Figma Section 660:10476, 1440×1182): violet→blue panel with four steps
+ * (Protect / Limit / Record / Review). Each step swaps the text and the card on top of the
+ * fan of glass cards. Tabs work on every width; on desktop with motion allowed the steps
+ * also switch while scrolling (like the Framer site). Then three numbers.
+ */
+
+/** Fan of 15 glass cards: rotation in degrees (Figma), position of the card's top-left corner. */
+const fan = [
+  [84, 10.5, 322], [72, 6.4, 264.7], [60, 14.4, 207.8], [48, 34, 153.8], [36, 64.3, 105.1],
+  [24, 104.2, 63.7], [12, 151.8, 31.6], [0, 205, 10], [-12, 261.5, 0], [-24, 318.9, 1.9],
+  [-36, 374.7, 15.7], [-48, 426.3, 40.9], [-60, 471.6, 76.2], [-72, 508.6, 120.1], [-84, 535.6, 170.8],
+];
+const pad = (n: number) => String(n + 1).padStart(2, "0");
+---
+
+<section class="security rounded-[24px] lg:rounded-[32px]" aria-labelledby="security-title" data-security>
+  <div class="mx-auto max-w-[1200px] px-4 pt-16 pb-16 sm:px-6 lg:px-10 lg:pt-[120px] lg:pb-[112px]">
+    <div class="border-l border-canvas/24">
+      <div class="mx-auto flex max-w-[731px] flex-col items-center px-4 text-center">
+        <Eyebrow {...s.eyebrow} theme="light" />
+        <h2 id="security-title" class="mt-4 text-h1 font-medium text-balance text-white" data-split="chars">
+          {s.title}<span class="text-[#d0ecdf]">{s.titleAccent}</span>
+        </h2>
+      </div>
+
+      <div class="sec-track mt-10 lg:mt-0 lg:pt-[88px]" data-steps-track>
+        <div class="sec-stage grid gap-10 lg:grid-cols-[341px_minmax(0,745px)] lg:gap-[33px] lg:items-start" data-steps-stage>
+          <div>
+            <div class="sec-tabs -ml-px hidden w-full max-w-[321px] flex-col gap-0.5" role="tablist" aria-label={s.tabsLabel} aria-orientation="vertical">
+              {
+                s.steps.map((step, i) => (
+                  <button
+                    type="button"
+                    role="tab"
+                    id={`sec-tab-${i}`}
+                    aria-controls={`sec-panel-${i}`}
+                    aria-selected={i === 0 ? "true" : "false"}
+                    tabindex={i === 0 ? 0 : -1}
+                    class="flex h-9 items-center gap-3.5 border-l-[3px] border-canvas/52 pl-[18px] text-left text-xs leading-4 font-medium tracking-[0.02em] text-sky uppercase transition-colors aria-selected:border-canvas aria-selected:text-canvas"
+                  >
+                    <span>{pad(i)}</span>
+                    {step.label}
+                  </button>
+                ))
+              }
+            </div>
+            <div class="sec-panels mt-0 grid gap-10 pl-5 lg:mt-[75px]">
+              {
+                s.steps.map((step, i) => (
+                  <div id={`sec-panel-${i}`} class="sec-panel" aria-labelledby={`sec-title-${i}`} data-step={i} data-step-panel data-active={i === 0 ? "" : undefined}>
+                    <h3 id={`sec-title-${i}`} class="max-w-[321px] text-h3 font-medium whitespace-pre-line text-canvas">{step.title}</h3>
+                    <p class="mt-[11px] max-w-[321px] text-base leading-[26px] text-canvas">{step.description}</p>
+                  </div>
+                ))
+              }
+            </div>
+            <div class="mt-7 pl-5">
+              <Button href={s.cta.href} variant="light" class="bg-canvas">{s.cta.label}</Button>
+            </div>
+          </div>
+
+          <div class="sec-visual relative mx-auto h-[calc(380px*var(--ss))] w-full max-w-[640px] lg:mt-[35px] lg:max-w-[560px]" aria-hidden="true" data-sec-visual>
+            <div class="sec-group absolute top-0 h-[380px] w-[560px] origin-top -translate-x-1/2 scale-(--ss)">
+              <div class="absolute top-[104px] left-0 h-[276px] w-[560px] overflow-hidden">
+                {fan.map(([rot, x, y]) => <span class="sec-fan" style={`left:${x}px;top:${y}px;rotate:${-rot}deg`} />)}
+              </div>
+              <span class="absolute top-[104px] left-[279px] h-[270px] w-0.5 bg-linear-to-b from-white/6 to-[#c8defb]/28" />
+              <div class="absolute top-0 left-[308px] grid w-[292px]">
+                {
+                  s.steps.map((step, i) => (
+                    <div class="sec-card rounded-[24px] border border-canvas bg-canvas px-[18px] pt-[18px] pb-4 shadow-[0_1px_2px_0_rgb(50_25_4/0.05),0_18px_44px_0_rgb(50_25_4/0.12)]" data-step={i} data-active={i === 0 ? "" : undefined}>
+                      <div class="flex items-center justify-between">
+                        <p class="flex items-center gap-2.5 text-h4 leading-6 font-medium tracking-[-0.015em] text-ink">
+                          <span class="h-6 w-[3px] bg-brand-bright" />
+                          {step.card.title}
+                        </p>
+                        <span class="font-mono text-[11px] leading-[14px] text-subtle">{step.card.number}</span>
+                      </div>
+                      <ul class="mt-3.5 flex flex-col gap-1.5">
+                        {step.card.rows.map((row) => (
+                          <li class="flex items-center justify-between gap-3 rounded-lg bg-canvas-2 px-2.5 py-[9px]">
+                            <span class="flex items-center gap-2 text-[13px] leading-[17px] text-ink">
+                              <svg class="size-[18px] shrink-0" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="9" fill="#6BB1FF" /><path d="m6.08 9.2 1.87 1.88 3.96-3.96" stroke="#FCFBF8" stroke-width="1.41" /></svg>
+                              {row.label}
+                            </span>
+                            <span class:list={["text-[11px] leading-[14px] font-medium tracking-[0.02em]", row.blocked ? "text-[#c2185b]" : "text-ink-2"]}>{row.status}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="pt-16 pl-5 text-sm leading-[18px] font-medium tracking-[0.02em] text-canvas uppercase lg:pt-24">{s.statsLabel}</p>
+      <dl class="mt-7 grid border-y border-canvas/24 md:grid-cols-3">
+        {
+          s.stats.map((stat, i) => (
+            <div class:list={["flex items-center gap-[22px] px-5 py-[30px] md:px-8", i > 0 && "border-t border-canvas/24 md:border-t-0", i < 2 && "md:border-r md:border-canvas/24"]}>
+              <dt class="text-[15px] leading-[21px] whitespace-pre-line text-canvas">{stat.label}</dt>
+              <dd class="order-first text-[44px] leading-[1.1] font-medium tracking-[-0.03em] text-canvas" data-count={stat.count ? stat.value : undefined}>
+                {stat.value}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </div>
+</section>
+
+<style>
+  .security {
+    background: linear-gradient(180deg, #6650aa, #4b50bb 50%, #2c4ebd);
+    --ss: 0.5;
+  }
+  @media (min-width: 768px) {
+    .security {
+      --ss: 1;
+    }
+  }
+  /* The card sticks out 40px to the right of the fan: keep both inside narrow screens. */
+  .sec-group {
+    left: calc(50% - 20px * var(--ss));
+  }
+  @media (min-width: 1024px) {
+    .sec-group {
+      left: 50%;
+    }
+  }
+  .sec-fan {
+    position: absolute;
+    width: 152px;
+    height: 264px;
+    transform-origin: 0 0;
+    border: 1px solid #c3dffe;
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(200 222 251 / 0.28));
+    box-shadow: 0 0 6px 0 rgb(19 44 52 / 0.05);
+  }
+  .sec-card {
+    grid-area: 1 / 1;
+  }
+  .sec-card:not([data-active]) {
+    opacity: 0;
+    visibility: hidden;
+  }
+  /* Tab mode: tabs visible, one text panel at a time. */
+  [data-security][data-tabs] .sec-tabs {
+    display: flex;
+  }
+  [data-security][data-tabs] .sec-panels {
+    margin-top: 40px;
+  }
+  [data-security][data-tabs] .sec-panel {
+    grid-area: 1 / 1;
+  }
+  [data-security][data-tabs] .sec-panel:not([data-active]) {
+    opacity: 0;
+    visibility: hidden;
+  }
+  @media (min-width: 1024px) {
+    [data-security][data-tabs] .sec-panels {
+      margin-top: 75px;
+    }
+    /* Scroll mode: the step block sticks while the four steps switch (300px each). */
+    [data-security][data-scroll] .sec-track {
+      height: calc(88px + 455px + 1000px);
+    }
+    [data-security][data-scroll] .sec-stage {
+      position: sticky;
+      top: calc(var(--spacing-nav) + 24px);
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .sec-panel,
+    .sec-card {
+      transition:
+        opacity 0.45s ease,
+        visibility 0.45s,
+        transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .sec-card:not([data-active]) {
+      transform: translateY(12px) scale(0.98);
+    }
+    [data-security][data-tabs] .sec-panel:not([data-active]) {
+      transform: translateY(8px);
+    }
+  }
+</style>
+
+<script>
+  import { initSteps } from "./steps";
+
+  const section = document.querySelector<HTMLElement>("[data-security]");
+  if (section) {
+    const visual = section.querySelector<HTMLElement>("[data-sec-visual]");
+    if (visual) {
+      const lg = window.matchMedia("(min-width: 1024px)");
+      new ResizeObserver(([e]) => visual.style.setProperty("--ss", String(Math.min(1, e.contentRect.width / (lg.matches ? 560 : 640))))).observe(visual);
+    }
+    initSteps(section, 300, { tabsOnMobile: true });
+  }
+</script>

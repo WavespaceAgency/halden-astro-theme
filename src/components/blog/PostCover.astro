@@ -1,0 +1,27 @@
+---
+import { Image } from "astro:assets";
+import Container from "@/components/ui/Container.astro";
+import type { Post } from "@/lib/content";
+
+interface Props {
+  post: Post;
+}
+/** Large cover photo under the post title (Figma "Cover", 1248×680). LCP image – loads eagerly. */
+const { data } = Astro.props.post;
+---
+
+<div class="pb-5">
+  <Container>
+    <div class="aspect-[358/220] overflow-hidden rounded-[20px] bg-canvas-2 sm:aspect-[1248/680] lg:rounded-[28px]">
+      <Image
+        src={data.image}
+        alt={data.imageAlt}
+        widths={[640, 960, 1280]}
+        sizes="(min-width: 1344px) 1248px, calc(100vw - 32px)"
+        class="size-full object-cover"
+        loading="eager"
+        fetchpriority="high"
+      />
+    </div>
+  </Container>
+</div>

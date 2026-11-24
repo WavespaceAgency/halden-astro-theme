@@ -1,0 +1,79 @@
+---
+import { getImage as optimizeImage } from "astro:assets";
+import { render } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import JsonLd from "@/components/JsonLd.astro";
+import PostBody from "@/components/blog/PostBody.astro";
+import PostCover from "@/components/blog/PostCover.astro";
+import PostHero from "@/components/blog/PostHero.astro";
+import RelatedPosts from "@/components/blog/RelatedPosts.astro";
+import CtaBand from "@/components/sections/CtaBand.astro";
+import TextEffects from "@/components/ui/TextEffects.astro";
+import { blogMdx } from "@/components/mdx";
+import { postPage } from "@/config/pages/blog";
+import { siteConfig } from "@/config/site";
+import { getPosts, type Post } from "@/lib/content";
+import { absoluteUrl } from "@/lib/seo";
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post, posts } }));
+}
+
+interface Props {
+  post: Post;
+  posts: Post[];
+}
+
+const { post, posts } = Astro.props;
+const { data } = post;
+const { Content, headings } = await render(post);
+const toc = headings.filter((h) => h.depth === 2);
+const url = absoluteUrl(`/blog/${post.id}`);
+
+// Related: same category first, then the newest of the rest.
+const others = posts.filter((p) => p.id !== post.id);
+const related = [...others.filter((p) => p.data.category === data.category), ...others.filter((p) => p.data.category !== data.category)];
+
+// Share image: the cover cropped to 1200×630.
+const og = await optimizeImage({ src: data.image, width: 1200, height: 630, fit: "cover", format: "jpg" });
+
+const articleLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BlogPosting",
+      "@id": `${url}#article`,
+      headline: data.title,
+      description: data.excerpt,
+      image: absoluteUrl(og.src),
+      datePublished: data.date,
+      dateModified: data.date,
+      articleSection: data.category,
+      keywords: data.tags.join(", "),
+      mainEntityOfPage: url,
+      author: { "@type": "Person", name: data.author.name, jobTitle: data.author.role },
+      publisher: { "@id": `${siteConfig.url}/#organization` },
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: postPage.breadcrumb.label, item: absoluteUrl(postPage.breadcrumb.href) },
+        { "@type": "ListItem", position: 2, name: data.title, item: url },
+      ],
+    },
+  ],
+};
+---
+
+<BaseLayout title={data.title} description={data.excerpt} type="article" image={og.src}>
+  <JsonLd slot="head" data={articleLd} />
+  <PostHero post={post} />
+  <PostCover post={post} />
+  <PostBody post={post} url={url} headings={toc}>
+    <Content components={blogMdx} />
+  </PostBody>
+  <RelatedPosts posts={related} />
+  <CtaBand />
+  <TextEffects />
+</BaseLayout>

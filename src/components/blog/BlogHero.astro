@@ -1,0 +1,25 @@
+---
+import Container from "@/components/ui/Container.astro";
+import { blogPage } from "@/config/pages/blog";
+import type { Post } from "@/lib/content";
+import PostCard from "./PostCard.astro";
+
+interface Props {
+  /** The two featured posts (first one gets the short image, second the tall one). */
+  posts: Post[];
+}
+const { posts } = Astro.props;
+const { hero } = blogPage;
+---
+
+<section class="bg-surface pt-10 pb-14 lg:pt-20 lg:pb-[74px]">
+  <Container size="wide" class="flex flex-col gap-10 xl:flex-row xl:items-start xl:justify-between">
+    <div class="flex max-w-[368px] flex-col gap-5">
+      <h1 class="text-display leading-[1.04] font-medium tracking-[-0.035em] whitespace-pre-line text-ink-2" data-split="chars">{hero.title}</h1>
+      <p class="text-lead text-body" data-split="words">{hero.description}</p>
+    </div>
+    <div class="grid gap-10 md:grid-cols-2 md:gap-6 xl:w-[808px] xl:shrink-0">
+      {posts.map((post, i) => <PostCard post={post} variant={i === 1 ? "featured-tall" : "featured"} eager splitTitle />)}
+    </div>
+  </Container>
+</section>

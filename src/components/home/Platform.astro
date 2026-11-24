@@ -1,0 +1,275 @@
+---
+import { Image } from "astro:assets";
+import Eyebrow from "@/components/ui/Eyebrow.astro";
+import { platform as p } from "@/config/pages/home";
+import { getImage } from "@/lib/images";
+
+/**
+ * "Built for how clinics work" – six feature cards (Figma Container 295:15518, 1440×1505).
+ * Each card has a small HTML mock-up (340px area) and a title + description.
+ * Mock-ups shrink inside narrow cards with a container query.
+ */
+const c = p.cards;
+const cards = [
+  { key: "records", bg: "bg-[#c8defb]", ...c.records },
+  { key: "language", bg: "bg-violet-tint", ...c.language },
+  { key: "handoff", bg: "bg-mint-tint", ...c.handoff },
+  { key: "log", bg: "bg-lime-tint", ...c.log },
+  { key: "rules", bg: "bg-[#f1f2f4]", ...c.rules },
+  { key: "safety", bg: "bg-canvas-2", ...c.safety },
+];
+
+/** Halden mark with the sky dot, on a 28 grid. */
+const mark = {
+  ring: "M26.385 14A12.385 12.385 0 1 1 1.615 14a12.385 12.385 0 0 1 24.77 0Z",
+  h: "M8.615 7.538v12.924M19.385 7.538v12.924M8.615 14h10.77",
+};
+const badge = "flex shrink-0 items-center justify-center bg-[radial-gradient(circle,#fff_35%,#dfebfd)] shadow-[0_1px_2px_0_rgb(50_25_4/0.05),0_10px_28px_0_rgb(50_25_4/0.07)]";
+const chip = "rounded-panel bg-canvas";
+const name = "block text-[15px] leading-5 font-medium text-ink";
+const meta = "mt-0.5 block text-[13px] leading-[17px] text-muted";
+const logBars = [8, 14, 22, 12, 18, 26, 10, 16, 20, 9, 15, 24, 11, 17];
+/** Rules calendar: 6 rows × 5 days. 0 = open, 1 = taken, 2 = cancelled. */
+const cal = [
+  [0, 0, 0, 0, 0],
+  [1, 0, 0, 0, 0],
+  [0, 1, 0, 0, 0],
+  [0, 2, 0, 0, 0],
+  [0, 0, 0, 1, 0],
+  [0, 0, 0, 0, 0],
+];
+---
+
+<section class="bg-white px-2 pt-20 pb-20 lg:pt-[120px] lg:pb-[130px]" aria-labelledby="platform-title">
+  <div class="flex flex-col items-center px-4 text-center sm:px-6 lg:px-8">
+    <Eyebrow {...p.eyebrow} />
+    <h2 id="platform-title" class="mt-2.5 text-h1 font-medium text-balance text-ink" data-split="chars">{p.title}</h2>
+    <p class="mt-2.5 max-w-[504px] text-lead text-muted" data-split="words">{p.description}</p>
+  </div>
+
+  <ul class="mx-auto mt-12 grid max-w-[1424px] gap-3 md:grid-cols-2 lg:mt-[88px] lg:grid-cols-3">
+    {
+      cards.map((card) => (
+        <li class={`@container flex flex-col overflow-hidden rounded-card ${card.bg}`}>
+          <div class="flex h-[300px] items-center justify-center overflow-hidden @[400px]:h-[340px]" aria-hidden="true">
+            <div class="plat-art scale-[0.72] @[330px]:scale-[0.8] @[360px]:scale-90 @[430px]:scale-100">
+              {card.key === "records" && (
+                <div class="relative flex h-[230px] w-[394px] items-center">
+                  <div class="flex h-[190px] w-[150px] flex-col gap-2 rounded-[7px] bg-canvas p-3.5">
+                    <span class="text-[11px] leading-[14px] font-medium text-ink-2">{c.records.record}</span>
+                    {[84, 108, 66, 96, 48, 78, 102].map((w) => (
+                      <span class="h-2 rounded bg-line-2" style={`width:${w}px`} />
+                    ))}
+                  </div>
+                  <span class={`${badge} absolute top-[88px] left-[122px] size-[54px] rounded-panel`}>
+                    <svg class="size-7" viewBox="0 0 28 28" fill="none" stroke="#071A31" stroke-width="2.36" stroke-linecap="round"><path d={mark.ring} /><path d={mark.h} /><circle cx="19.38" cy="7.53" r="2.8" fill="#C3DFFE" stroke="none" /></svg>
+                  </span>
+                  <div class="ml-[44px] flex flex-col gap-2.5">
+                    <div class={`${chip} relative flex h-16 w-[200px] items-center gap-3 pr-[18px] pl-3 shadow-[0_1px_2px_0_rgb(50_25_4/0.05),0_10px_28px_0_rgb(50_25_4/0.07)]`}>
+                      <Image src={getImage(c.records.doctor.avatar)} alt="" width={40} height={40} densities={[1, 2]} class="size-10 rounded-full object-cover" />
+                      <span>
+                        <span class={name}>{c.records.doctor.name}</span>
+                        <span class={meta}>{c.records.doctor.time}</span>
+                      </span>
+                      <span class="absolute -top-[7.5px] -right-[4px] flex size-[22px] items-center justify-center rounded-full bg-[#6bb1ff] shadow-[0_1px_2px_0_rgb(50_25_4/0.05),0_10px_28px_0_rgb(50_25_4/0.07)]">
+                        <svg class="size-3" viewBox="7 6 9 8" fill="none" stroke="#FCFBF8" stroke-width="1.49"><path d="M7.45 10.2 9.69 12.45l4.75-4.74" /></svg>
+                      </span>
+                    </div>
+                    <div class={`${chip} flex w-[200px] flex-col gap-[7px] px-3.5 pt-3 pb-3.5`}>
+                      <span class="text-[11px] leading-[14px] font-medium text-ink-2">{c.records.notes}</span>
+                      <span class="flex flex-col gap-[5px]">
+                        {[163, 146, 103].map((w) => (
+                          <span class="h-2 rounded bg-line-2" style={`width:${w}px`} />
+                        ))}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {card.key === "language" && (
+                <div class="flex w-[356px] flex-col items-center">
+                  <div class="flex h-[104px] items-center gap-2.5">
+                    <span class="flex size-[52px] items-center justify-center rounded-full bg-brand-bright">
+                      <svg class="size-[22px]" viewBox="0 0 22 22" fill="none" stroke="#FCFBF8" stroke-width="1.46" stroke-linejoin="round"><path d="M4.58 3.7h3.66l1.65 4.13-2.2 1.47a10.08 10.08 0 0 0 5.05 5.04l1.46-2.2 4.13 1.65v3.66a1.38 1.38 0 0 1-1.38 1.38A15.13 15.13 0 0 1 3.2 5.08 1.38 1.38 0 0 1 4.58 3.7Z" /></svg>
+                    </span>
+                    <span class="plat-dash w-[54px] text-[#988abf]" />
+                    <span class={`${badge} size-[104px] rounded-[24px]`}>
+                      <svg class="size-[54px]" viewBox="0 0 28 28" fill="none" stroke="#071A31" stroke-width="2.36" stroke-linecap="round"><path d={mark.ring} /><path d={mark.h} /><circle cx="19.38" cy="7.53" r="2.8" fill="#C3DFFE" stroke="none" /></svg>
+                    </span>
+                    <span class="plat-dash w-[54px] text-[#988abf]" />
+                    <span class="flex size-[52px] items-center justify-center rounded-full bg-brand text-[15px] leading-5 font-semibold text-canvas">{c.language.code}</span>
+                  </div>
+                  <span class="plat-vdash h-10 text-[#988abf]" />
+                  <div class={`${chip} w-[297px] px-[18px] py-3.5`}>
+                    <span class="block text-[15px] leading-[18px] font-medium tracking-[-0.015em] text-ink">{c.language.quote}</span>
+                    <span class="mt-1 block text-xs leading-4 text-body">{c.language.meta}</span>
+                  </div>
+                </div>
+              )}
+
+              {card.key === "handoff" && (
+                <div class="flex w-[403px] flex-col items-center">
+                  <div class="flex items-center gap-2.5">
+                    <span class={`${badge} size-16 rounded-[24px]`}>
+                      <svg class="size-8" viewBox="0 0 28 28" fill="none" stroke="#071A31" stroke-width="2.36" stroke-linecap="round"><path d={mark.ring} /><path d={mark.h} /><circle cx="19.38" cy="7.53" r="2.8" fill="#C3DFFE" stroke="none" /></svg>
+                    </span>
+                    <span class="plat-dash w-[22px] text-[#96c4c1]" />
+                    <div class={`${chip} flex h-16 w-[202px] items-center gap-3 pr-[18px] pl-3`}>
+                      <Image src={getImage(c.handoff.person.avatar)} alt="" width={40} height={40} densities={[1, 2]} class="size-10 rounded-full object-cover" />
+                      <span>
+                        <span class={name}>{c.handoff.person.name}</span>
+                        <span class={meta}>{c.handoff.person.topic}</span>
+                      </span>
+                    </div>
+                    <span class="plat-dash w-[22px] text-[#96c4c1]" />
+                    <span class="flex size-[52px] items-center justify-center rounded-full bg-brand shadow-[0_1px_2px_0_rgb(50_25_4/0.05),0_10px_28px_0_rgb(50_25_4/0.07)]">
+                      <svg class="size-[22px]" viewBox="0 0 23 23" fill="none" stroke="#FCFBF8" stroke-width="1.84"><path d="m4.6 12.01 4.14 4.14 8.75-8.75" /></svg>
+                    </span>
+                  </div>
+                  <span class="plat-vdash h-8 text-[#96c4c1]" />
+                  <div class={`${chip} w-[281px] px-4 py-3`}>
+                    <span class="flex items-center justify-between">
+                      <span class="text-[11px] leading-5 font-medium text-ink-2">{c.handoff.summary}</span>
+                      <span class="plat-ring rounded-full bg-[#f6f9e8] px-2 py-[3px] text-[11px] leading-[14px] font-medium text-[#4d5c12]">{c.handoff.status}</span>
+                    </span>
+                    <span class="mt-2 flex flex-col gap-0.5">
+                      <span class="h-2 w-[224px] rounded bg-[#e6e5e5]" />
+                      <span class="h-2 w-[174px] rounded bg-[#e6e5e5]" />
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {card.key === "log" && (
+                <div class="relative w-[330px]">
+                  <div class="overflow-hidden rounded-[24px] bg-canvas">
+                    <div class="flex items-center justify-between border-b border-line px-3.5 py-3">
+                      <span class="text-xs leading-4 font-medium text-ink-2">{c.log.heading}</span>
+                      <span class="plat-bars flex h-[26px] w-[81px] items-center gap-[3px]">
+                        {logBars.map((h, i) => (
+                          <span class="w-[3px] rounded-sm bg-brand-bright" style={`height:${h}px;--i:${i}`} />
+                        ))}
+                      </span>
+                    </div>
+                    {c.log.calls.map((call, i) => (
+                      <div class:list={["flex items-center justify-between px-3.5 py-2.5", i < c.log.calls.length - 1 && "border-b border-line"]}>
+                        <span class="flex items-center gap-2.5 text-[13px] leading-[17px] text-ink">
+                          <Image src={getImage(call.avatar)} alt="" width={28} height={28} densities={[1, 2]} class="size-7 rounded-full object-cover" />
+                          {call.name} {call.topic}
+                        </span>
+                        <span class:list={["rounded-full px-2 py-0.5 text-[11px] leading-[14px]", call.transferred ? "bg-[#f6fae8] text-[#4d5c12]" : "bg-sky-tint text-brand-text"]}>{call.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <span class={`${badge} absolute -top-[25.5px] left-[296px] size-14 rounded-panel`}>
+                    <svg class="size-7" viewBox="0 0 28 28" fill="none" stroke="#071A31" stroke-width="2.36" stroke-linecap="round"><path d={mark.ring} /><path d={mark.h} /><circle cx="19.38" cy="7.53" r="2.8" fill="#C3DFFE" stroke="none" /></svg>
+                  </span>
+                </div>
+              )}
+
+              {card.key === "rules" && (
+                <div class="flex w-[393px] items-center gap-2.5">
+                  <div class="rounded-xl bg-canvas p-2.5">
+                    <span class="block h-[7px] w-[63px] rounded bg-[#e6e5e5]" />
+                    <span class="mt-2.5 grid grid-cols-[repeat(5,18.4px)] gap-x-[3.1px] gap-y-[3px]">
+                      {cal.flat().map((cell) => (
+                        <span
+                          class:list={[
+                            "flex h-[22.1px] items-center justify-center text-[11px] leading-[14px] text-[#c2185b]",
+                            cell === 0 && "bg-sky-soft",
+                            cell === 1 && "bg-[#d0d3d8]",
+                            cell === 2 && "bg-[#e7f0c1]",
+                          ]}
+                        >
+                          {cell === 2 ? "×" : ""}
+                        </span>
+                      ))}
+                    </span>
+                  </div>
+                  <span class="plat-dash w-3.5 text-[#c8cbd1]" />
+                  <span class={`${badge} size-12 rounded-panel`}>
+                    <svg class="size-6" viewBox="0 0 28 28" fill="none" stroke="#071A31" stroke-width="2.36" stroke-linecap="round"><path d={mark.ring} /><path d={mark.h} /><circle cx="19.38" cy="7.53" r="2.8" fill="#C3DFFE" stroke="none" /></svg>
+                  </span>
+                  <span class="plat-dash w-3.5 text-[#c8cbd1]" />
+                  <div class={`${chip} relative flex h-16 w-[152px] items-center gap-3 pr-[18px] pl-3`}>
+                    <Image src={getImage(c.rules.doctor.avatar)} alt="" width={40} height={40} densities={[1, 2]} class="size-10 rounded-full object-cover" />
+                    <span>
+                      <span class={name}>{c.rules.doctor.name}</span>
+                      <span class={meta}>{c.rules.doctor.time}</span>
+                    </span>
+                    <span class="absolute -top-[11.5px] left-[75px] rounded-full bg-[#dfecfd] px-2 py-[3px] text-xs leading-4 font-semibold whitespace-nowrap text-brand-text">{c.rules.filled}</span>
+                  </div>
+                </div>
+              )}
+
+              {card.key === "safety" && (
+                <div class="flex w-[314px] flex-col items-center">
+                  <div class={`${chip} flex w-[298px] items-center gap-2 px-4 py-3`}>
+                    <span class="plat-ring size-2 shrink-0 rounded-full bg-brand" />
+                    <span class="text-sm leading-[18px] whitespace-nowrap text-ink">{c.safety.quote}</span>
+                  </div>
+                  <span class="plat-vdash h-[30px] text-[#a7a7a5]" />
+                  <div class="flex w-full items-center gap-2.5">
+                    <span class="flex size-[84px] shrink-0 items-center justify-center rounded-[24px] bg-[radial-gradient(circle,#fff_35%,#dfebfd)] shadow-[0_1px_7px_0_rgb(50_25_4/0.05),0_2px_31px_0_rgb(50_25_4/0.05)]">
+                      <svg class="size-[38px]" viewBox="0 0 38 38" fill="none" stroke="#071A31" stroke-width="2.37" stroke-linejoin="round"><path d="M19 5.25 7.12 10v8.7c0 7.29 5.07 13.15 11.88 15.05 6.8-1.9 11.87-7.76 11.87-15.05V10L19 5.25Z" /><path d="m13.93 19.5 3.48 3.48 6.81-6.97" /></svg>
+                    </span>
+                    <span class="plat-dash w-10 text-[#a7a7a5]" />
+                    <div class={`${chip} flex w-[170px] items-center gap-2.5 py-3 pr-[18px] pl-3`}>
+                      <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink-2 shadow-[0_1px_2px_0_rgb(50_25_4/0.05),0_10px_28px_0_rgb(50_25_4/0.07)]">
+                        <svg class="size-3" viewBox="0 0 12 12" fill="none" stroke="#FCFBF8" stroke-width="1.8" stroke-linecap="round"><path d="M6 .75v10.5M.75 6h10.5" /></svg>
+                      </span>
+                      <span>
+                        <span class={name}>{c.safety.line.name}</span>
+                        <span class={meta}>{c.safety.line.status}</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div class="px-6 pt-[22px] pb-10 sm:px-10">
+            <h3 class="text-h3 font-medium text-ink" data-split="chars">{card.title}</h3>
+            <p class="mt-1 text-lead text-body" data-split="words">{card.description}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  /* Dashed connector lines between the mock-up pieces (colour = currentColor). */
+  .plat-dash {
+    flex: none;
+    height: 0;
+    border-top: 1.5px dashed currentColor;
+  }
+  .plat-vdash {
+    display: block;
+    width: 0;
+    border-left: 1.5px dashed currentColor;
+  }
+  .plat-art {
+    transform-origin: center;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .plat-bars > span {
+      animation: plat-bar 1s ease-in-out calc(var(--i) * -0.17s) infinite alternate;
+    }
+    .plat-ring {
+      animation: plat-pulse 1.4s ease-in-out infinite alternate;
+    }
+  }
+  @keyframes plat-bar {
+    from {
+      transform: scaleY(0.45);
+    }
+  }
+  @keyframes plat-pulse {
+    to {
+      opacity: 0.55;
+    }
+  }
+</style>

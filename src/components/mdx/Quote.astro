@@ -1,0 +1,18 @@
+---
+/**
+ * Pull quote in blog posts:
+ *   <Quote cite="Dr. Lena Ortiz, Brightwater Dermatology">“Quote text”</Quote>
+ */
+interface Props {
+  /** Who said it (name, organisation). */
+  cite?: string;
+}
+const { cite } = Astro.props;
+---
+
+<figure class="flex flex-col gap-4 rounded-card bg-sky-soft p-6 sm:p-8">
+  <blockquote class="text-xl leading-[1.35] font-medium tracking-[-0.01em] text-ink-2 sm:text-2xl [&_p]:m-0">
+    <slot />
+  </blockquote>
+  {cite && <figcaption class="text-[15px] leading-5 text-body">{cite}</figcaption>}
+</figure>
