@@ -5,6 +5,7 @@ import Eyebrow from "@/components/ui/Eyebrow.astro";
 import PlayIcon from "@/components/ui/PlayIcon.astro";
 import { ctaBand } from "@/config/pages/shared";
 import { getImage } from "@/lib/images";
+import { isExternal } from "@/lib/utils";
 
 /**
  * Closing call to action above the footer (Figma "Frame 10/11", 1440×660).
@@ -33,7 +34,7 @@ const c = ctaBand;
     <p class="mt-4 max-w-[460px] text-lead text-canvas">{c.description}</p>
     <div class="mt-8 flex flex-wrap justify-center gap-4">
       <Button href={c.primary.href} size="xl" class="rounded-[22px] shadow-[0_0_24px_0_rgb(44_103_246/0.55)]">{c.primary.label}</Button>
-      <Button href={c.secondary.href} variant="glass" size="xl" class="rounded-[22px] border-white/55 bg-white/8">
+      <Button href={c.secondary.href} {...(isExternal(c.secondary.href) ? { target: "_blank", rel: "noopener" } : {})} variant="glass" size="xl" class="rounded-[22px] border-white/55 bg-white/8">
         <PlayIcon />
         {c.secondary.label}
       </Button>

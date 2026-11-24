@@ -30,8 +30,10 @@ const d = bookDemo;
     <ul class="grid grid-cols-2 gap-3 sm:grid-cols-4" data-stagger>
       {
         d.logos.items.map((name) => (
-          <li class="flex min-h-[52px] items-center justify-center rounded-[14px] bg-surface px-2 text-center text-sm leading-[18px] font-medium tracking-[-0.01em] text-body">
-            {name}
+          <li class="flex">
+            <span class="flex min-h-[52px] w-full items-center justify-center rounded-[14px] bg-surface px-2 text-center text-sm leading-[18px] font-medium tracking-[-0.01em] text-body transition-[translate,box-shadow,color] duration-300 ease-[cubic-bezier(0.34,1.45,0.64,1)] hover:-translate-y-0.5 hover:text-ink hover:shadow-card motion-reduce:hover:translate-y-0">
+              {name}
+            </span>
           </li>
         ))
       }

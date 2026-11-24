@@ -21,7 +21,8 @@ export const hero = {
   description:
     "Halden is the AI agent that answers every patient call, text and referral, so clinic teams spend their day with patients instead of on hold.",
   primary: { label: "Book a demo", href: siteConfig.cta.href },
-  secondary: { label: "Live Demo", href: "/platform" },
+  /** "Live Demo" button: the hosted dashboard demo (src/config/site.ts), opens in a new tab. */
+  secondary: siteConfig.liveDemo,
 };
 
 export const story = {

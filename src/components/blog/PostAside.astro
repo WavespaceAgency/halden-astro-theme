@@ -30,19 +30,22 @@ const label = "font-mono text-xs leading-4 font-medium tracking-[0.08em] text-bo
         <p id="toc-title" class={label}>
           {p.tocTitle}
         </p>
-        <ul class="flex flex-col gap-3.5">
-          {headings.map((h) => (
-            <li>
-              <a
-                href={`#${h.slug}`}
-                data-toc-link
-                class="flex min-h-8 items-center border-l-2 border-ink-2/12 py-1.5 pl-3 text-[15px] leading-5 text-body transition-colors hover:text-ink-2 aria-[current=location]:border-brand aria-[current=location]:font-medium aria-[current=location]:text-ink-2"
-              >
-                {h.text}
-              </a>
-            </li>
-          ))}
-        </ul>
+        <div class="relative">
+          <span class="toc-marker pointer-events-none absolute top-0 left-0 w-0.5 bg-brand" aria-hidden="true" data-toc-indicator></span>
+          <ul class="flex flex-col gap-3.5">
+            {headings.map((h) => (
+              <li>
+                <a
+                  href={`#${h.slug}`}
+                  data-toc-link
+                  class="toc-link flex min-h-8 items-center border-l-2 border-ink-2/12 py-1.5 pl-3 text-[15px] leading-5 text-body transition-[color,padding] duration-300 hover:text-ink-2 aria-[current=location]:border-brand aria-[current=location]:font-medium aria-[current=location]:text-ink-2"
+                >
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </nav>
     )
   }
@@ -58,7 +61,7 @@ const label = "font-mono text-xs leading-4 font-medium tracking-[0.08em] text-bo
               target="_blank"
               rel="noopener noreferrer"
               aria-label={s.name}
-              class="flex size-11 items-center justify-center rounded-full border border-line bg-surface text-sm leading-[18px] font-medium text-ink-2 transition-colors hover:bg-sky-tint lg:size-10 lg:border-transparent"
+              class="share-btn flex size-11 items-center justify-center rounded-full border border-line bg-surface text-sm leading-[18px] font-medium text-ink-2 transition-[background-color,translate] duration-300 hover:bg-sky-tint lg:size-10 lg:border-transparent"
             >
               {s.label}
             </a>
@@ -71,11 +74,16 @@ const label = "font-mono text-xs leading-4 font-medium tracking-[0.08em] text-bo
           aria-label={p.copyLink.name}
           data-copy-link={url}
           data-copied-label={p.copyLink.copied}
-          class="flex size-11 items-center justify-center rounded-full border border-line bg-surface text-ink-2 transition-colors hover:bg-sky-tint lg:size-10 lg:border-transparent"
+          class="share-btn flex size-11 items-center justify-center rounded-full border border-line bg-surface text-ink-2 transition-[background-color,translate] duration-300 hover:bg-sky-tint lg:size-10 lg:border-transparent"
         >
-          <svg class="size-3" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-            <path d="M3 9 9 3M4 3h5v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
+          <span class="copy-icons relative size-3.5" aria-hidden="true">
+            <svg class="copy-arrow absolute inset-0 m-auto size-3" viewBox="0 0 12 12" fill="none" data-no-draw>
+              <path d="M3 9 9 3M4 3h5v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <svg class="copy-check absolute inset-0 m-auto size-3.5 text-brand" viewBox="0 0 14 14" fill="none" data-no-draw>
+              <path d="m2.5 7.5 3 3 6-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" pathLength="1"></path>
+            </svg>
+          </span>
         </button>
         <span class="sr-only" aria-live="polite" data-copy-status></span>
       </li>
@@ -96,6 +104,70 @@ const label = "font-mono text-xs leading-4 font-medium tracking-[0.08em] text-bo
   </div>
 </aside>
 
+<style>
+  /* Sliding marker on the "On this page" line (TocSpy sets --y/--h). Without JS the active link's own border shows. */
+  .toc-marker {
+    display: none;
+    height: var(--h, 0);
+    translate: 0 var(--y, 0);
+    transition:
+      translate 0.55s cubic-bezier(0.34, 1.25, 0.64, 1),
+      height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-toc-ready] .toc-marker {
+    display: block;
+  }
+  [data-toc-ready] .toc-link[aria-current="location"] {
+    border-color: color-mix(in srgb, var(--ink-2) 12%, transparent);
+  }
+  @media (hover: hover) {
+    .toc-link:hover {
+      padding-left: 16px;
+    }
+    .share-btn:hover {
+      translate: 0 -2px;
+    }
+  }
+  .copy-arrow,
+  .copy-check {
+    transition:
+      opacity 0.2s ease,
+      scale 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .copy-check {
+    opacity: 0;
+    scale: 0.4;
+  }
+  .copy-check path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 0.4s ease 0.1s;
+  }
+  [data-copied] .copy-arrow {
+    opacity: 0;
+    scale: 0.4;
+  }
+  [data-copied] .copy-check {
+    opacity: 1;
+    scale: 1;
+  }
+  [data-copied] .copy-check path {
+    stroke-dashoffset: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .toc-marker,
+    .toc-link,
+    .copy-arrow,
+    .copy-check,
+    .copy-check path {
+      transition: none;
+    }
+    .toc-link:hover {
+      padding-left: 12px;
+    }
+  }
+</style>
+
 <script>
   document.querySelectorAll<HTMLButtonElement>("[data-copy-link]").forEach((button) => {
     const status = button.parentElement?.querySelector("[data-copy-status]");
@@ -104,8 +176,10 @@ const label = "font-mono text-xs leading-4 font-medium tracking-[0.08em] text-bo
         await navigator.clipboard.writeText(button.dataset.copyLink ?? location.href);
         if (status) status.textContent = button.dataset.copiedLabel ?? "";
         button.classList.add("bg-sky-tint");
+        button.setAttribute("data-copied", "");
         setTimeout(() => {
           button.classList.remove("bg-sky-tint");
+          button.removeAttribute("data-copied");
           if (status) status.textContent = "";
         }, 2000);
       } catch {

@@ -32,6 +32,9 @@ export const siteConfig = {
   /** Main call to action, used in the header and mobile menu. */
   cta: { label: "Book a demo", href: "/book-a-demo" },
 
+  /** "Live Demo" buttons (hero, about, closing CTA band). An external link opens in a new tab. */
+  liveDemo: { label: "Live Demo", href: "https://halden-web-dashboard.vercel.app/" },
+
   nav: {
     /** Header links. */
     main: [

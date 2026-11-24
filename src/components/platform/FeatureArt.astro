@@ -17,7 +17,7 @@ const { art } = Astro.props;
 const t = features.art;
 const surface = "bg-canvas";
 const person = "flex h-16 items-center gap-3 rounded-[16px] bg-canvas px-3";
-const dash = "border-dashed opacity-30";
+const dash = "fa-conn border-dashed opacity-30";
 const check = "M4.6 12 8.75 16.15 17.5 7.4";
 const bars = [3, 14, 21, 5, 18, 25, 8, 13, 20, 8, 9, 17, 9, 10];
 const slotColor = { o: "bg-[#cbdefc]", "-": "bg-[#d0d3d8]", x: "bg-[#e7f0c1]" } as const;
@@ -44,7 +44,7 @@ const slotColor = { o: "bg-[#cbdefc]", "-": "bg-[#d0d3d8]", x: "bg-[#e7f0c1]" } 
             <span class="text-[15px] leading-[19px] font-medium text-ink">{t.records.person.name}</span>
             <span class="text-[13px] leading-4 text-muted">{t.records.person.detail}</span>
           </span>
-          <span class:list={["absolute -top-[7px] right-[10px] flex size-[22px] items-center justify-center rounded-full bg-[#6bb1ff]", mockShadow]} data-b="pop" style="--i:5">
+          <span class:list={["fa-badge absolute -top-[7px] right-[10px] flex size-[22px] items-center justify-center rounded-full bg-[#6bb1ff]", mockShadow]} data-b="pop" style="--i:5;--k:1">
             <svg class="size-3" viewBox="0 0 22 22" fill="none">
               <path d={check} stroke="#fcfbf8" stroke-width="1.85" />
             </svg>
@@ -115,7 +115,7 @@ const slotColor = { o: "bg-[#cbdefc]", "-": "bg-[#d0d3d8]", x: "bg-[#e7f0c1]" } 
           </span>
         </div>
         <span class:list={["absolute top-[31px] left-[317px] w-[22px] border-t-[3px] border-[#96c4c1]", dash]} />
-        <span class:list={["absolute top-1.5 left-[349px] flex size-[52px] items-center justify-center rounded-full bg-brand", mockShadow]} data-b="pop" style="--i:3">
+        <span class:list={["fa-badge absolute top-1.5 left-[349px] flex size-[52px] items-center justify-center rounded-full bg-brand", mockShadow]} data-b="pop" style="--i:3;--k:1.5">
           <svg class="size-[22px]" viewBox="0 0 22 22" fill="none">
             <path d={check} stroke="#fcfbf8" stroke-width="1.85" />
           </svg>
@@ -124,7 +124,7 @@ const slotColor = { o: "bg-[#cbdefc]", "-": "bg-[#d0d3d8]", x: "bg-[#e7f0c1]" } 
         <div class:list={["absolute top-24 left-[60px] h-[70px] w-[281px] rounded-[16px] px-4 pt-3", surface]} data-b="up" style="--i:2">
           <div class="flex items-center justify-between">
             <span class="text-[11px] leading-[14px] font-medium text-ink-2">{t.handoff.summary}</span>
-            <span class="flex h-5 items-center rounded-full bg-[#f6f9e8] px-2 text-[11px] leading-[14px] font-medium text-[#4d5c12]" data-b="pop" style="--i:4">
+            <span class="fa-ring flex h-5 items-center rounded-full bg-[#f6f9e8] px-2 text-[11px] leading-[14px] font-medium text-[#4d5c12]" data-b="pop" style="--i:4">
               {t.handoff.status}
             </span>
           </div>
@@ -155,11 +155,11 @@ const slotColor = { o: "bg-[#cbdefc]", "-": "bg-[#d0d3d8]", x: "bg-[#e7f0c1]" } 
               </span>
               <span
                 class:list={[
-                  "flex h-[18px] items-center rounded-full px-2 text-[11px] leading-[14px]",
+                  "fa-badge flex h-[18px] items-center rounded-full px-2 text-[11px] leading-[14px]",
                   row.tone === "blue" ? "bg-[#eef5ff] text-brand-text" : "bg-[#eef6dc] text-[#4d5c12]",
                 ]}
                 data-b="pop"
-                style={`--i:${i + 2}`}
+                style={`--i:${i + 2};--k:${i}`}
               >
                 {row.status}
               </span>
@@ -200,9 +200,9 @@ const slotColor = { o: "bg-[#cbdefc]", "-": "bg-[#d0d3d8]", x: "bg-[#e7f0c1]" } 
             <span class="text-[13px] leading-4 text-muted">{t.rules.person.detail}</span>
           </span>
           <span
-            class="absolute -top-3 left-[75px] flex h-[21px] items-center rounded-full bg-[#dfecfd] px-2 text-xs leading-[15px] font-semibold whitespace-nowrap text-brand-text"
+            class="fa-badge absolute -top-3 left-[75px] flex h-[21px] items-center rounded-full bg-[#dfecfd] px-2 text-xs leading-[15px] font-semibold whitespace-nowrap text-brand-text"
             data-b="pop"
-            style="--i:4"
+            style="--i:4;--k:2"
           >
             {t.rules.badge}
           </span>

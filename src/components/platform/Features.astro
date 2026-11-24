@@ -6,6 +6,9 @@ import FeatureArt from "./FeatureArt.astro";
 /**
  * "Built for how clinics work": six coloured cards with small product illustrations
  * (Figma 1440×1505, 3 × 2 grid of 467×496 cards, 8px from the page edge).
+ * Motion (from Framer): parts rise / pop in once, then a 5.4s story loops in each card – dashed connectors
+ * light up one after another, badges and status pills pop back in, skeleton lines redraw.
+ * Hover: the card lifts 4px (as Framer) with a soft shadow and the illustration zooms slightly.
  */
 ---
 
@@ -73,6 +76,93 @@ import FeatureArt from "./FeatureArt.astro";
       animation: var(--animate-pulse-soft);
     }
   }
+  /* 5.4s story loop (Framer "Connector" / "Badge" / "Status" / "Divider"); starts after the entrance */
+  @media (prefers-reduced-motion: no-preference) {
+    .feature-card.is-on :global(.fa-conn) {
+      animation: fa-conn 5.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+      animation-delay: calc(1.6s + var(--c, 0) * 0.8s);
+    }
+    .feature-card.is-on :global(.fa-badge) {
+      animation: fa-badge 5.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+      animation-delay: calc(1.6s + var(--k, 0) * 0.8s);
+    }
+    .feature-card.is-on :global([data-b="line"]) {
+      animation: fa-line 5.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+      animation-delay: calc(2s + var(--i, 0) * 0.06s);
+    }
+    .feature-card.is-on :global(.fa-ring) {
+      animation: fa-ring 1.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+    }
+  }
+  @keyframes fa-conn {
+    0%,
+    14%,
+    30%,
+    100% {
+      opacity: 0.3;
+    }
+    16%,
+    22% {
+      opacity: 1;
+    }
+  }
+  @keyframes fa-badge {
+    0%,
+    22%,
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+    6%,
+    14% {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    19% {
+      opacity: 1;
+      transform: scale(1.06);
+    }
+  }
+  @keyframes fa-line {
+    0%,
+    26%,
+    100% {
+      transform: none;
+    }
+    6%,
+    12% {
+      transform: scaleX(0);
+    }
+  }
+  @keyframes fa-ring {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  /* Hover (pointer devices): lift + soft shadow, illustration zooms a little */
+  @media (hover: hover) {
+    .feature-card {
+      transition:
+        translate 0.45s cubic-bezier(0.34, 1.3, 0.64, 1),
+        box-shadow 0.45s ease;
+    }
+    .feature-card :global(.feature-art) {
+      transition: scale 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .feature-card:hover {
+      translate: 0 -4px;
+      box-shadow: 0 24px 48px -24px rgb(12 26 47 / 0.22);
+    }
+    .feature-card:hover :global(.feature-art) {
+      scale: 1.03;
+    }
+  }
+
   @keyframes feature-wave {
     0%,
     100% {
@@ -86,6 +176,8 @@ import FeatureArt from "./FeatureArt.astro";
 
 <script>
   const cards = document.querySelectorAll<HTMLElement>("[data-feature]");
+  // Connectors light up in DOM order inside each card.
+  cards.forEach((card) => card.querySelectorAll<HTMLElement>(".fa-conn").forEach((el, i) => el.style.setProperty("--c", String(i))));
   if ("IntersectionObserver" in window) {
     const io = new IntersectionObserver(
       (entries) => {

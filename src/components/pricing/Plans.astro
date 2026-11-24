@@ -19,12 +19,12 @@ const s = plans;
       descriptionClass="max-w-[438px]"
     />
 
-    <ul class="mt-12 grid gap-4 md:grid-cols-3 lg:mt-16 lg:min-h-[602px]">
+    <ul data-stagger class="mt-12 grid gap-4 md:grid-cols-3 lg:mt-16 lg:min-h-[602px]">
       {
         s.items.map((plan) => {
           const dark = plan.featured;
           return (
-            <li class={cn("flex flex-col gap-8 rounded-card p-5 sm:p-6 lg:p-10", dark ? "bg-ink" : "bg-canvas-2")}>
+            <li class={cn("lift-card flex flex-col gap-8 rounded-card p-5 sm:p-6 lg:p-10", dark ? "plan-dark bg-ink" : "plan-light bg-canvas-2")}>
               <div class="flex flex-col gap-3">
                 <p class="flex items-center gap-2">
                   <span class={cn("font-mono text-sm leading-[18px] tracking-[1.2px] uppercase", dark ? "text-sky" : "text-body")}>{plan.name}</span>
@@ -47,7 +47,7 @@ const s = plans;
               <a
                 href={plan.cta.href}
                 class={cn(
-                  "inline-flex min-h-[52px] items-center justify-center rounded-full px-6 text-base leading-6 font-medium text-ink transition-[background-color,transform] duration-150 active:scale-[0.97]",
+                  "inline-flex min-h-[52px] items-center justify-center rounded-full px-6 text-base leading-6 font-medium text-ink transition-[background-color,scale] duration-[250ms,450ms] ease-[ease,cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.02] active:scale-[0.97] motion-reduce:hover:scale-100",
                   dark ? "bg-surface hover:bg-sky-tint" : "border border-black/16 hover:bg-surface",
                 )}
               >
@@ -74,6 +74,33 @@ const s = plans;
 </section>
 
 <style>
+  /* Hover: plan cards lift with a soft shadow (the dark one glows blue); feature ticks nudge. */
+  .lift-card {
+    transition:
+      opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0s),
+      transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0s),
+      translate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 0.3s ease,
+      box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (hover: hover) {
+    .lift-card:hover {
+      translate: 0 -4px;
+    }
+    .plan-light:hover {
+      background-color: var(--surface);
+      box-shadow: 0 2px 4px 0 rgb(50 25 4 / 0.04), 0 22px 48px -10px rgb(50 25 4 / 0.14);
+    }
+    .plan-dark:hover {
+      box-shadow: 0 2px 4px 0 rgb(7 26 49 / 0.2), 0 24px 56px -12px rgb(44 103 246 / 0.45);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lift-card:hover {
+      translate: none;
+    }
+  }
+
   /* "Most popular" pill: soft lime → mint → blue glow (Figma badge fills). */
   .plan-badge {
     background:

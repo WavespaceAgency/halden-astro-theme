@@ -26,7 +26,7 @@ export const ctaBand = {
   title: "Hear Halden answer\nyour clinic’s phone.",
   description: "Book a 30-minute demo and we'll show you a live call set up with your clinic's own rules.",
   primary: { label: "Book a demo", href: siteConfig.cta.href },
-  secondary: { label: "Live Demo", href: "/platform" },
+  secondary: siteConfig.liveDemo,
   /** Background photo in src/assets/images. */
   image: "/images/shared/cta-background.png",
 };

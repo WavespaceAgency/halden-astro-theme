@@ -6,8 +6,10 @@ import { history } from "@/config/pages/about";
 /**
  * "Company History" (Figma "History", 1440×976): a dial of ticks above a horizontal
  * timeline. The centre card sits on a blue "spotlight"; the track slides one card per
- * step (prev / next buttons, swipe, autoplay every few seconds) and the dial turns 4° per step,
- * as on the Framer site. Without JavaScript the start card is shown in the centre.
+ * step (prev / next buttons, drag / swipe, arrow keys, click a side card, autoplay every few
+ * seconds) and the dial turns 4° per step, as on the Framer site. While dragging, track and dial follow
+ * the pointer; the ticks around the centre light up blue. Without JavaScript the start card is centred.
+ * Text motion (Framer): heading letters pop, subtitle and card texts un-blur, card titles pop.
  */
 const h = history;
 /** Bars in each progress meter (Figma: 42 bars, 6.4px apart). */
@@ -24,8 +26,8 @@ const ticks = Array.from({ length: 59 }, (_, k) => k - 29).filter((k) => k !== 0
 
   <div class="relative flex flex-col items-center px-4 pt-12 text-center sm:px-6 lg:pt-[66px]">
     <Eyebrow {...h.eyebrow} />
-    <h2 id="history-title" class="mt-4 text-display leading-[1.3] font-medium text-ink-2">{h.title}</h2>
-    <p class="mt-[3px] text-lg leading-[23px] text-body">{h.description}</p>
+    <SplitText as="h2" id="history-title" mode="chars" text={h.title} class="mt-4 text-display leading-[1.3] font-medium tracking-[-0.042em] text-ink-2" />
+    <SplitText text={h.description} class="mt-[3px] text-lg leading-[23px] text-body" />
   </div>
 
   <div class="stage relative mt-[170px] lg:mt-[241px]" role="region" aria-roledescription="carousel" aria-label={h.labels.region}>
@@ -33,15 +35,16 @@ const ticks = Array.from({ length: 59 }, (_, k) => k - 29).filter((k) => k !== 0
       {
         ticks.map((k) => (
           <line
+            class="tick"
+            data-k={k}
             x1="0"
             y1="400"
             x2="0"
             y2="428"
-            stroke="#0c1a2f"
             stroke-opacity={fade[Math.abs(k)]}
             stroke-width="2"
             stroke-linecap="round"
-            transform={`rotate(${k * 4})`}
+            style={`--a:${k * 4}deg`}
           />
         ))
       }
@@ -54,14 +57,14 @@ const ticks = Array.from({ length: 59 }, (_, k) => k - 29).filter((k) => k !== 0
       {
         h.milestones.map((m, i) => (
           <li
-            class="card flex min-h-[312px] shrink-0 flex-col rounded-[28px] border border-white/90 bg-white/70 px-[23px] py-[31px] sm:px-[29px]"
+            class="card flex min-h-[312px] select-none shrink-0 flex-col rounded-[28px] border border-white/90 bg-white/70 px-[23px] py-[31px] sm:px-[29px]"
             data-card
             data-far={Math.abs(i - h.start) > 1 ? "" : undefined}
             aria-current={i === h.start ? "true" : undefined}
           >
             <p class="self-start rounded-lg border-[1.5px] border-ink-2/12 px-3 py-[5px] font-mono text-[15px] leading-5 font-medium tracking-[0.04em] text-ink-2">{m.year}</p>
             <SplitText as="h3" text={m.title} mode="chars" class="mt-[18px] text-[24px] leading-[1.2] font-medium tracking-[-0.015em] text-ink-2 sm:text-[26px]" />
-            <p class="mt-[18px] mb-[18px] text-base leading-[26px] tracking-[-0.01em] text-body">{m.text}</p>
+            <SplitText text={m.text} class="mt-[18px] mb-[18px] text-base leading-[26px] tracking-[-0.01em] text-body" />
             <div class="progress relative mt-auto h-[52px] shrink-0 rounded-[14px] bg-ink-2/5" aria-hidden="true">
               <span class="bars absolute inset-y-[14px] left-[14px] w-[264px] opacity-25" />
               <span class="bars bars-on absolute inset-y-[14px] left-[14px]" style={`width:${Math.round(m.progress * bars) * 6.4 - 4.9}px`} />
@@ -73,11 +76,11 @@ const ticks = Array.from({ length: 59 }, (_, k) => k - 29).filter((k) => k !== 0
   </div>
 
   <div class="relative flex justify-center gap-3 pt-14 pb-16 lg:pb-[100px]">
-    <button type="button" class="flex size-12 items-center justify-center rounded-full bg-sky-tint text-lg font-medium text-ink transition-colors hover:bg-sky" data-prev aria-label={h.labels.prev}>
-      <span aria-hidden="true">←</span>
+    <button type="button" class="nav-btn flex size-12 items-center justify-center rounded-full bg-sky-tint text-lg font-medium text-ink transition-colors hover:bg-sky" data-prev aria-label={h.labels.prev}>
+      <span class="arrow" aria-hidden="true" style="--nudge:-3px">←</span>
     </button>
-    <button type="button" class="flex size-12 items-center justify-center rounded-full bg-brand text-lg font-medium text-white transition-colors hover:bg-brand-hover" data-next aria-label={h.labels.next}>
-      <span aria-hidden="true">→</span>
+    <button type="button" class="nav-btn flex size-12 items-center justify-center rounded-full bg-brand text-lg font-medium text-white transition-colors hover:bg-brand-hover" data-next aria-label={h.labels.next}>
+      <span class="arrow" aria-hidden="true" style="--nudge:3px">→</span>
     </button>
   </div>
 </section>
@@ -98,11 +101,46 @@ const ticks = Array.from({ length: 59 }, (_, k) => k - 29).filter((k) => k !== 0
     filter: blur(90px);
     pointer-events: none;
   }
+  .history {
+    /* Framer's step: slow start, quick middle, soft landing (~0.8s). After a drag: ease-out. */
+    --ease: cubic-bezier(0.55, 0, 0.2, 1);
+    --dur: 0.8s;
+  }
+  .history[data-release] {
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --dur: 0.6s;
+  }
+  .history[data-dragging] {
+    --dur: 0s;
+  }
   .dial {
     top: -975px;
     margin-left: -500px;
-    transform: rotate(calc((var(--i) - var(--start)) * -4deg));
-    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: rotate(calc((var(--i) - var(--start)) * -4deg + var(--dd, 0deg)));
+    transition: transform var(--dur) var(--ease);
+  }
+  .tick {
+    stroke: #0c1a2f;
+    transform: rotate(var(--a));
+    transition:
+      stroke 0.45s ease,
+      stroke-opacity 0.45s ease,
+      transform 0.6s cubic-bezier(0.34, 1.45, 0.64, 1);
+  }
+  .tick[data-hl] {
+    stroke: #2c67f6;
+  }
+  .tick[data-hl="1"] {
+    stroke-opacity: 0.9;
+    transform: rotate(var(--a)) translateY(8px);
+  }
+  .tick[data-hl="2"] {
+    stroke-opacity: 0.7;
+    transform: rotate(var(--a)) translateY(5px);
+  }
+  .tick[data-hl="3"] {
+    stroke-opacity: 0.5;
+    transform: rotate(var(--a)) translateY(2px);
   }
   @media (min-width: 1024px) {
     .dial {
@@ -114,16 +152,47 @@ const ticks = Array.from({ length: 59 }, (_, k) => k - 29).filter((k) => k !== 0
     outline: 2px solid rgb(44 103 246 / 0.9);
     box-shadow: 0 20px 56px -8px rgb(44 103 246 / 0.25);
   }
-  .track {
-    transform: translateX(calc(-1 * (var(--i) * (var(--cw) + 24px) + var(--cw) / 2)));
-    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  .stage {
     touch-action: pan-y;
+  }
+  :global(html.js) .stage {
+    cursor: grab;
+  }
+  .history[data-dragging] .stage {
+    cursor: grabbing;
+  }
+  .track {
+    transform: translateX(calc(-1 * (var(--i) * (var(--cw) + 24px) + var(--cw) / 2) + var(--drag, 0px)));
+    transition: transform var(--dur) var(--ease);
   }
   .card {
     width: var(--cw);
+    transition:
+      translate 0.45s cubic-bezier(0.34, 1.45, 0.64, 1),
+      box-shadow 0.45s ease;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     box-shadow: 0 16px 40px -12px rgb(12 26 47 / 0.08);
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .history:not([data-dragging]) .card:not([aria-current]):hover {
+      translate: 0 -4px;
+      box-shadow: 0 24px 48px -16px rgb(12 26 47 / 0.14);
+    }
+    .nav-btn:hover .arrow {
+      translate: var(--nudge) 0;
+    }
+  }
+  .arrow {
+    transition: translate 0.35s cubic-bezier(0.34, 1.45, 0.64, 1);
+  }
+  .nav-btn {
+    transition:
+      background-color 0.2s ease,
+      scale 0.2s ease;
+  }
+  .nav-btn:active {
+    scale: 0.94;
   }
   .progress {
     transition: opacity 0.6s ease;
@@ -144,20 +213,40 @@ const ticks = Array.from({ length: 59 }, (_, k) => k - 29).filter((k) => k !== 0
 
   document.querySelectorAll<HTMLElement>("[data-history]").forEach((root) => {
     const cards = [...root.querySelectorAll<HTMLElement>("[data-card]")];
-    const track = root.querySelector<HTMLElement>("[data-track]");
+    const ticks = [...root.querySelectorAll<SVGElement>(".tick")];
+    const stage = root.querySelector<HTMLElement>(".stage");
+    const spotlight = root.querySelector<HTMLElement>(".spotlight");
     const count = cards.length;
+    const start0 = Number(root.style.getPropertyValue("--start")) || 0;
     let index = Number(root.style.getPropertyValue("--i")) || 0;
     const seconds = Number(root.dataset.autoplay ?? 0);
+    /** Width of one step (card + gap) in px. */
+    const stepPx = () => (cards[0]?.offsetWidth ?? 340) + 24;
 
-    const go = (next: number) => {
+    /** Light up the ticks around the screen centre (dial position `pos` in steps from the start card). */
+    const highlight = (pos: number) => {
+      const centre = Math.round(pos - start0);
+      ticks.forEach((t) => {
+        const d = Math.abs(Number(t.dataset.k) - centre) + 1;
+        if (d <= 3) t.setAttribute("data-hl", String(d));
+        else t.removeAttribute("data-hl");
+      });
+    };
+
+    const go = (next: number, release = false) => {
+      const prev = index;
       index = (next + count) % count;
+      root.toggleAttribute("data-release", release);
       root.style.setProperty("--i", String(index));
       cards.forEach((card, i) => {
         card.toggleAttribute("data-far", Math.abs(i - index) > 1);
         if (i === index) card.setAttribute("aria-current", "true");
         else card.removeAttribute("aria-current");
       });
+      highlight(index);
+      if (prev !== index && !reduceMotion()) spotlight?.animate({ scale: [1, 0.97, 1] }, { duration: 700, easing: "cubic-bezier(0.34, 1.45, 0.64, 1)" });
     };
+    highlight(index);
 
     // Autoplay: only while the section is on screen and nobody is interacting with it.
     let timer = 0;
@@ -177,7 +266,6 @@ const ticks = Array.from({ length: 59 }, (_, k) => k - 29).filter((k) => k !== 0
       paused = value;
       start();
     };
-    const stage = root.querySelector<HTMLElement>(".stage");
     stage?.addEventListener("pointerenter", pause(true));
     stage?.addEventListener("pointerleave", pause(false));
     root.addEventListener("focusin", pause(true));
@@ -185,19 +273,72 @@ const ticks = Array.from({ length: 59 }, (_, k) => k - 29).filter((k) => k !== 0
 
     root.querySelector("[data-prev]")?.addEventListener("click", () => go(index - 1));
     root.querySelector("[data-next]")?.addEventListener("click", () => go(index + 1));
+    root.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") go(index - 1);
+      else if (e.key === "ArrowRight") go(index + 1);
+    });
 
-    // Swipe on touch screens.
-    let x0: number | null = null;
-    track?.addEventListener("pointerdown", (e) => (x0 = e.pointerType === "mouse" ? null : e.clientX), { passive: true });
-    track?.addEventListener(
-      "pointerup",
-      (e) => {
-        if (x0 === null) return;
-        const dx = e.clientX - x0;
-        if (Math.abs(dx) > 40) go(index + (dx < 0 ? 1 : -1));
-        x0 = null;
-      },
-      { passive: true },
+    // Drag (mouse) and swipe (touch): track and dial follow the pointer, then snap to the nearest card.
+    let x0 = 0;
+    let y0 = 0;
+    let dx = 0;
+    let t0 = 0;
+    let down = false;
+    let dragging = false;
+    let moved = false;
+    const setDrag = (px: number) => {
+      root.style.setProperty("--drag", `${px}px`);
+      root.style.setProperty("--dd", `${(px / stepPx()) * 4}deg`);
+      highlight(index - px / stepPx());
+    };
+    stage?.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      down = true;
+      dragging = false;
+      moved = false;
+      x0 = e.clientX;
+      y0 = e.clientY;
+      dx = 0;
+      t0 = performance.now();
+    });
+    stage?.addEventListener("pointermove", (e) => {
+      if (!down) return;
+      dx = e.clientX - x0;
+      const dy = e.clientY - y0;
+      if (!dragging) {
+        if (Math.abs(dx) < 6 || Math.abs(dx) < Math.abs(dy)) {
+          if (Math.abs(dy) > 10) down = false; // vertical scroll wins
+          return;
+        }
+        dragging = true;
+        moved = true;
+        stage.setPointerCapture(e.pointerId);
+        root.setAttribute("data-dragging", "");
+      }
+      setDrag(dx);
+    });
+    const end = (cancel: boolean) => {
+      if (!down) return;
+      down = false;
+      if (!dragging) return;
+      dragging = false;
+      root.removeAttribute("data-dragging");
+      const step = stepPx();
+      const speed = dx / Math.max(1, performance.now() - t0); // px per ms
+      let steps = Math.round(-dx / step);
+      if (!cancel && steps === 0 && (Math.abs(dx) > 50 || Math.abs(speed) > 0.4)) steps = dx < 0 ? 1 : -1;
+      root.style.setProperty("--drag", "0px");
+      root.style.setProperty("--dd", "0deg");
+      go(index + (cancel ? 0 : steps), true);
+    };
+    stage?.addEventListener("pointerup", () => end(false));
+    stage?.addEventListener("pointercancel", () => end(true));
+    // A click (no drag) on a side card brings it to the centre.
+    cards.forEach((card, i) =>
+      card.addEventListener("click", () => {
+        if (moved) return;
+        if (i !== index) go(i);
+      }),
     );
   });
 </script>

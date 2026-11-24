@@ -188,6 +188,33 @@ const logo = "M15.077 8A7.077 7.077 0 1 1 .923 8a7.077 7.077 0 0 1 14.154 0ZM4.9
       will-change: transform;
     }
   }
+
+  /* Hover: collage pieces lift (scale, separate from the scroll-linked transform) with a deeper shadow;
+     photos zoom inside their frame; list rows highlight. */
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .res-items > [data-m] {
+      transition:
+        scale 0.5s cubic-bezier(0.34, 1.45, 0.64, 1),
+        box-shadow 0.4s ease-out;
+    }
+    .res-items > [data-m]:hover {
+      scale: 1.04;
+      z-index: 5;
+      box-shadow: 0 28px 56px -18px rgb(30 40 80 / 0.3);
+    }
+    .res-items > [data-m] :global(img) {
+      transition: scale 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .res-items > [data-m]:hover :global(img) {
+      scale: 1.06;
+    }
+    .res-items li {
+      transition: background-color 0.25s ease-out, translate 0.35s cubic-bezier(0.34, 1.45, 0.64, 1);
+    }
+    .res-items li:hover {
+      translate: 2px 0;
+    }
+  }
 </style>
 
 <script>

@@ -35,6 +35,8 @@ export function initSteps(section: HTMLElement, step = 500, { tabsOnMobile = fal
       tab.tabIndex = t === i ? 0 : -1;
     });
     parts.forEach((el) => el.toggleAttribute("data-active", Number(el.dataset.step) === i));
+    // Sliding active indicator (CSS reads --tab-i on the tablist).
+    tabs[i].closest<HTMLElement>("[role=tablist]")?.style.setProperty("--tab-i", String(i));
     if (focus) tabs[i].focus();
   };
 

@@ -87,7 +87,7 @@
   --text-display: clamp(2.5rem, 1.81rem + 2.93vw, 4rem); /* 40 → 64px */
   --text-display--line-height: 1.08;
   --text-display--letter-spacing: -0.03em;
-  --text-h1: clamp(2.25rem, 1.72rem + 2.25vw, 3.375rem); /* 36 → 54px */
+  --text-h1: clamp(2.125rem, 1.685rem + 1.878vw, 3.375rem); /* 34 → 54px (Framer mobile 34) */
   --text-h1--line-height: 1.1;
   --text-h1--letter-spacing: -0.03em;
   --text-h2: clamp(2rem, 1.72rem + 1.2vw, 2.75rem); /* 32 → 44px */

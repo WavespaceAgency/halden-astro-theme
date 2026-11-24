@@ -8,9 +8,11 @@ import JobVerify from "./JobVerify.astro";
 
 /**
  * "How it works": four jobs with a product mockup each (Figma 1440×1128, Framer "HowItWorks").
- * Desktop (1024px+, with JavaScript): the job row sticks while you scroll through 1500px,
- * and the active job (tabs on the left) changes every quarter – like the Framer site.
- * Phones, tablets and no-JS: the four jobs are stacked (mockup, then title and text).
+ * With JavaScript the job row sticks while you scroll through 1500px and the active job cross-fades
+ * at +40px, +540px and +1040px of the track – the same thresholds as the Framer site, on every width.
+ * Desktop (1024px+) shows tabs with a sliding indicator; phones/tablets pin the whole job card (mockup,
+ * title, text) at 72px like Framer mobile. Without JS, or when the card is taller than the screen
+ * (e.g. landscape phones), the four jobs are stacked.
  * Mockups are drawn on an 828×520 canvas and scaled down to fit narrower columns.
  */
 const h = howItWorks;
@@ -37,7 +39,8 @@ const washes = [
 
     <div class="hiw-track mt-12 lg:mt-8" data-hiw-track>
       <div class="hiw-sticky">
-        <div role="tablist" aria-label={h.tabsLabel} aria-orientation="vertical" class="hiw-tabs hidden flex-col gap-1" data-hiw-tabs>
+        <div role="tablist" aria-label={h.tabsLabel} aria-orientation="vertical" class="hiw-tabs relative hidden flex-col gap-1" data-hiw-tabs>
+          <span class="hiw-ind" aria-hidden="true" data-hiw-ind></span>
           {
             h.jobs.map((job, i) => (
               <button
@@ -47,7 +50,7 @@ const washes = [
                 aria-controls={`hiw-job-${job.id}`}
                 aria-selected={i === 0 ? "true" : "false"}
                 tabindex={i === 0 ? 0 : -1}
-                class="flex min-h-11 items-center gap-4 border-l-2 border-line pl-[18px] text-left text-[13px] leading-4 font-medium tracking-[0.02em] text-body uppercase transition-colors duration-300 hover:text-ink aria-selected:border-ink aria-selected:text-ink"
+                class="flex min-h-11 items-center gap-4 border-l-2 border-line pl-[18px] text-left text-[13px] leading-4 font-medium tracking-[0.02em] text-body uppercase transition-colors duration-300 hover:text-ink focus-visible:text-ink aria-selected:text-ink"
               >
                 <span>{job.number}</span>
                 <span>{job.label}</span>
@@ -110,6 +113,7 @@ const washes = [
           }
         </div>
       </div>
+      <div class="hiw-spacer" aria-hidden="true"></div>
     </div>
   </div>
 </section>
@@ -144,13 +148,66 @@ const washes = [
     max-width: 36rem;
   }
 
-  /* ---------- Desktop sticky layout (only with JS, see script) */
+  /* ---------- Pinned layout (JS adds .is-pinned): the job card sticks while the 1500px spacer scrolls by */
+  .hiw {
+    /* Framer's 650ms spring (opacity) for the job cross-fade */
+    --hiw-ease: linear(0 0%, 0.012 1.5625%, 0.0428 3.125%, 0.0863 4.6875%, 0.1377 6.25%, 0.1937 7.8125%, 0.2515 9.375%, 0.3094 10.9375%, 0.3661 12.5%, 0.4205 14.0625%, 0.4721 15.625%, 0.5206 17.1875%, 0.5658 18.75%, 0.6077 20.3125%, 0.6462 21.875%, 0.6814 23.4375%, 0.7136 25%, 0.7428 26.5625%, 0.7694 28.125%, 0.7934 29.6875%, 0.815 31.25%, 0.8346 32.8125%, 0.8521 34.375%, 0.8679 35.9375%, 0.8821 37.5%, 0.8948 39.0625%, 0.9062 40.625%, 0.9163 42.1875%, 0.9254 43.75%, 0.9336 45.3125%, 0.9408 46.875%, 0.9473 48.4375%, 0.9531 50%, 0.9582 51.5625%, 0.9628 53.125%, 0.9669 54.6875%, 0.9706 56.25%, 0.9738 57.8125%, 0.9767 59.375%, 0.9793 60.9375%, 0.9816 62.5%, 0.9836 64.0625%, 0.9854 65.625%, 0.987 67.1875%, 0.9885 68.75%, 0.9898 70.3125%, 0.9909 71.875%, 0.9919 73.4375%, 0.9928 75%, 0.9936 76.5625%, 0.9943 78.125%, 0.9949 79.6875%, 0.9955 81.25%, 0.996 82.8125%, 0.9964 84.375%, 0.9968 85.9375%, 0.9972 87.5%, 0.9975 89.0625%, 0.9978 90.625%, 0.998 92.1875%, 0.9982 93.75%, 1 95.3125%, 1 96.875%, 1 98.4375%, 1 100%);
+  }
+  .hiw-spacer {
+    display: none;
+  }
+  .is-pinned .hiw-spacer {
+    display: block;
+    height: 1500px;
+  }
+  .is-pinned .hiw-sticky {
+    position: sticky;
+    top: 72px;
+  }
+  .is-pinned .hiw-jobs {
+    display: grid;
+  }
+  .is-pinned .hiw-job {
+    grid-area: 1 / 1;
+    transition: visibility 0s linear 0.65s;
+  }
+  .is-pinned .hiw-job:not(.is-active) {
+    visibility: hidden;
+  }
+  .is-pinned .hiw-job.is-active {
+    visibility: visible;
+    transition-delay: 0s;
+  }
+  .is-pinned .hiw-detail {
+    transition: opacity 0.2s ease;
+  }
+  .is-pinned .hiw-job:not(.is-active) .hiw-detail {
+    opacity: 0;
+  }
+  .is-pinned .hiw-art {
+    transition: opacity 0.65s var(--hiw-ease);
+  }
+  .is-pinned .hiw-job:not(.is-active) .hiw-art {
+    opacity: 0;
+  }
+
+  /* Sliding indicator of the active tab (position set by the script) */
+  .hiw-ind {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2px;
+    height: var(--ind-h, 44px);
+    background: var(--color-ink);
+    transform: translateY(var(--ind-y, 0));
+    transition:
+      transform 0.55s cubic-bezier(0.34, 1.3, 0.64, 1),
+      height 0.55s cubic-bezier(0.34, 1.3, 0.64, 1);
+    pointer-events: none;
+  }
+
   @media (min-width: 1024px) {
-    :global(html.js) .hiw-track {
-      height: calc(600px + var(--hiw-scroll, 1500px));
-    }
-    :global(html.js) .hiw-sticky {
-      position: sticky;
+    .is-pinned .hiw-sticky {
       top: 40px;
       height: 600px;
       padding-top: 80px;
@@ -158,64 +215,86 @@ const washes = [
       grid-template-columns: minmax(0, 404fr) minmax(0, 828fr);
       column-gap: 48px;
     }
-    :global(html.js) .hiw-tabs {
+    .is-pinned .hiw-tabs {
       display: flex;
       grid-area: 1 / 1;
       align-self: start;
-      position: relative;
       z-index: 1;
     }
-    :global(html.js) .hiw-shared-bg {
+    .is-pinned .hiw-shared-bg {
       display: block;
       grid-area: 1 / 2;
     }
-    :global(html.js) .hiw-jobs {
-      display: grid;
+    .is-pinned .hiw-jobs {
       grid-area: 1 / 1 / 2 / 3;
       grid-template-columns: subgrid;
     }
-    :global(html.js) .hiw-job {
+    .is-pinned .hiw-job {
       grid-area: 1 / 1 / 2 / 3;
       display: grid;
       grid-template-columns: subgrid;
-      transition: visibility 0s linear 0.45s;
     }
-    :global(html.js) .hiw-job:not(.is-active) {
-      visibility: hidden;
-    }
-    :global(html.js) .hiw-job.is-active {
-      visibility: visible;
-      transition-delay: 0s;
-    }
-    :global(html.js) .hiw-art {
+    .is-pinned .hiw-art {
       grid-area: 1 / 2;
+      transition: none;
     }
-    :global(html.js) .hiw-detail {
+    .is-pinned .hiw-job:not(.is-active) .hiw-art {
+      opacity: 1;
+    }
+    .is-pinned .hiw-detail {
       grid-area: 1 / 1;
       margin-top: 228px;
       max-width: 360px;
     }
-    :global(html.js) .hiw-own-bg {
+    .is-pinned .hiw-own-bg {
       display: none;
     }
-    :global(html.js) .hiw-job .hiw-canvas > :not(.hiw-own-bg) {
+    /* Desktop: the shared wash stays, only the mockup content cross-fades */
+    .is-pinned .hiw-job .hiw-canvas > :not(.hiw-own-bg) {
       transition:
-        opacity 0.45s ease,
-        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        opacity 0.65s var(--hiw-ease),
+        transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
     }
-    :global(html.js) .hiw-job:not(.is-active) .hiw-canvas > :not(.hiw-own-bg) {
+    .is-pinned .hiw-job:not(.is-active) .hiw-canvas > :not(.hiw-own-bg) {
       opacity: 0;
       transform: scale(0.96);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hiw :is(.hiw-art, .hiw-detail, .hiw-canvas > *, .hiw-ind) {
+      transition: none !important;
+    }
+  }
+
+  /* ---------- Hover: mockup cards and nodes lift, calendar slots light up (hover devices only) */
+  @media (hover: hover) {
+    .hiw-stage :global([data-a="s"]:hover) {
+      translate: 0 -3px;
+      filter: drop-shadow(0 10px 14px rgb(12 26 47 / 0.1));
+    }
+    .hiw-stage :global(.hiw-slot) {
+      transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        scale 0.2s ease;
+    }
+    .hiw-stage :global(.hiw-slot:not(.bg-brand):hover) {
+      scale: 1.06;
+      background-color: #dfebfd;
+      color: #2457d6;
     }
   }
 
   /* ---------- Mockup entrance (children with data-a, staggered by --i) */
   @media (prefers-reduced-motion: no-preference) {
     .hiw-stage :global([data-a]) {
+      --d: calc(0.12s + var(--i, 0) * 0.08s);
       transition:
-        opacity 0.5s ease,
-        transform 0.6s cubic-bezier(0.34, 1.3, 0.64, 1);
-      transition-delay: calc(0.12s + var(--i, 0) * 0.08s);
+        opacity 0.5s ease var(--d),
+        transform 0.6s cubic-bezier(0.34, 1.3, 0.64, 1) var(--d),
+        translate 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        filter 0.35s ease;
     }
     :global(html.js) .hiw-job:not(.is-on) .hiw-stage :global([data-a="s"]) {
       transform: scale(0.9);
@@ -280,9 +359,13 @@ const washes = [
     const track = section.querySelector<HTMLElement>("[data-hiw-track]")!;
     const tabs = Array.from(section.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
     const jobs = Array.from(section.querySelectorAll<HTMLElement>("[data-hiw-job]"));
+    const ind = section.querySelector<HTMLElement>("[data-hiw-ind]");
     const desktop = window.matchMedia("(min-width: 1024px)");
-    const STICKY_TOP = 40;
+    // Framer: the next job fades in at +40px, +540px and +1040px of the track (1500px of scroll space).
+    const FIRST = 40;
+    const STEP = 500;
     let active = -1;
+    let pinned = false;
 
     // Scale the 828×520 mockups to their column.
     const ro = new ResizeObserver((entries) => {
@@ -298,6 +381,13 @@ const washes = [
       });
     };
 
+    const moveIndicator = (index: number) => {
+      const tab = tabs[index];
+      if (!ind || !tab || !tab.offsetHeight) return;
+      ind.style.setProperty("--ind-y", `${tab.offsetTop}px`);
+      ind.style.setProperty("--ind-h", `${tab.offsetHeight}px`);
+    };
+
     const setActive = (index: number) => {
       if (index === active) return;
       active = index;
@@ -305,6 +395,7 @@ const washes = [
         tab.setAttribute("aria-selected", String(i === index));
         tab.tabIndex = i === index ? 0 : -1;
       });
+      moveIndicator(index);
       jobs.forEach((job, i) => {
         const on = i === index;
         job.classList.toggle("is-active", on);
@@ -314,11 +405,10 @@ const washes = [
       });
     };
 
-    const range = () => track.offsetHeight - 600;
     const indexFromScroll = () => {
-      const top = track.getBoundingClientRect().top - STICKY_TOP;
-      const p = -top / range();
-      return Math.max(0, Math.min(jobs.length - 1, Math.floor(p * jobs.length)));
+      const offset = -track.getBoundingClientRect().top;
+      if (offset < FIRST) return 0;
+      return Math.min(jobs.length - 1, Math.floor((offset - FIRST) / STEP) + 1);
     };
 
     let ticking = false;
@@ -327,14 +417,14 @@ const washes = [
       ticking = true;
       requestAnimationFrame(() => {
         ticking = false;
-        if (desktop.matches) setActive(indexFromScroll());
+        if (pinned) setActive(indexFromScroll());
       });
     };
 
-    // Phones / tablets: every job is shown; play its mockup + text when it scrolls into view.
+    // Stacked mode: every job is shown; play its mockup + text when it scrolls into view.
     const io = new IntersectionObserver(
       (entries) => {
-        if (desktop.matches) return;
+        if (pinned) return;
         for (const e of entries) {
           if (!e.isIntersecting) continue;
           const job = e.target as HTMLElement;
@@ -346,10 +436,19 @@ const washes = [
       { threshold: 0.35 },
     );
 
+    /** Pin on desktop, and on smaller screens when the tallest job card fits under the 72px sticky top. */
+    const shouldPin = () => {
+      if (desktop.matches) return true;
+      const tallest = Math.max(...jobs.map((job) => job.offsetHeight));
+      return tallest + 72 + 24 <= window.innerHeight;
+    };
+
     const setMode = () => {
-      // Tab semantics only exist while the tabs are shown (desktop).
+      const next = shouldPin();
+      const tabsShown = next && desktop.matches;
       jobs.forEach((job) => {
-        if (desktop.matches) {
+        // Tab semantics only exist while the tabs are shown (desktop).
+        if (tabsShown) {
           job.setAttribute("role", "tabpanel");
           job.setAttribute("aria-labelledby", job.dataset.tab ?? "");
         } else {
@@ -357,28 +456,36 @@ const washes = [
           job.removeAttribute("aria-labelledby");
         }
       });
-      if (desktop.matches) {
-        active = -1;
-        setActive(indexFromScroll());
-      } else {
-        active = -1;
+      if (next === pinned && next) {
+        moveIndicator(active);
+        return;
+      }
+      pinned = next;
+      section.classList.toggle("is-pinned", pinned);
+      active = -1;
+      if (pinned) setActive(indexFromScroll());
+      else
         jobs.forEach((job) => {
           job.classList.remove("is-active");
           job.removeAttribute("inert");
         });
-      }
     };
 
     if (reduceMotion()) jobs.forEach((job) => job.classList.add("is-on"));
     jobs.forEach((job) => io.observe(job));
     setMode();
     desktop.addEventListener("change", setMode);
+    let resizeTimer = 0;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(setMode, 150);
+    });
     window.addEventListener("scroll", onScroll, { passive: true });
 
-    // Tabs: click / arrow keys scroll to that job.
+    // Tabs: click / arrow keys scroll to the middle of that job's scroll range.
     const goTo = (i: number) => {
-      const trackTop = track.getBoundingClientRect().top + window.scrollY - STICKY_TOP;
-      const y = trackTop + ((i + 0.5) / jobs.length) * range();
+      const trackTop = track.getBoundingClientRect().top + window.scrollY;
+      const y = i === 0 ? trackTop - 60 : trackTop + FIRST + (i - 1) * STEP + STEP / 2;
       scrollToY(y);
       setActive(i);
     };

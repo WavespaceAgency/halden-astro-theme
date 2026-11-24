@@ -3,6 +3,9 @@
  * Highlights the "On this page" / "Contents" link of the section in view.
  * Mark each link with data-toc-link and href="#section-id"; the active one gets
  * aria-current="location" (style it with aria-[current=location]:…).
+ * Optional sliding marker: put an element with data-toc-indicator inside the nav (in the
+ * links' parent, which must be position: relative). It gets --x/--y/--w/--h of the active link, and the nav gets
+ * data-toc-ready once it is placed (use it to hide the static aria-current styles).
  * Include once per page.
  */
 ---
@@ -15,6 +18,29 @@
       .filter((el): el is HTMLElement => !!el);
     if (!targets.length) return;
 
+    const indicators = Array.from(document.querySelectorAll<HTMLElement>("[data-toc-indicator]"));
+    let current: string | null = null;
+
+    const place = (indicator: HTMLElement) => {
+      const nav = indicator.parentElement!;
+      const link = Array.from(nav.querySelectorAll<HTMLAnchorElement>("[data-toc-link]")).find((l) => l.hash === current);
+      if (!link || !link.offsetParent) return;
+      // offsets relative to the indicator's parent (give it position: relative)
+      const a = link.getBoundingClientRect();
+      const p = nav.getBoundingClientRect();
+      indicator.style.setProperty("--x", `${a.left - p.left}px`);
+      indicator.style.setProperty("--y", `${a.top - p.top}px`);
+      indicator.style.setProperty("--w", `${a.width}px`);
+      indicator.style.setProperty("--h", `${a.height}px`);
+      const host = nav.closest("nav");
+      if (host && !host.hasAttribute("data-toc-ready")) {
+        // first placement: jump there, slide only on later changes
+        indicator.style.transition = "none";
+        host.setAttribute("data-toc-ready", "");
+        requestAnimationFrame(() => requestAnimationFrame(() => (indicator.style.transition = "")));
+      }
+    };
+
     let ticking = false;
     const update = () => {
       ticking = false;
@@ -23,10 +49,14 @@
       for (const t of targets) if (t.getBoundingClientRect().top <= line) active = t;
       // At the very bottom of the page, the last section wins.
       if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) active = targets[targets.length - 1];
+      const hash = `#${active.id}`;
+      if (hash === current) return;
+      current = hash;
       for (const link of links) {
-        if (link.hash === `#${active.id}`) link.setAttribute("aria-current", "location");
+        if (link.hash === hash) link.setAttribute("aria-current", "location");
         else link.removeAttribute("aria-current");
       }
+      indicators.forEach(place);
     };
     const onScroll = () => {
       if (!ticking) {
@@ -35,8 +65,10 @@
       }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
+    window.addEventListener("resize", () => indicators.forEach(place), { passive: true });
     update();
+    // Fonts can change link heights after the first paint.
+    document.fonts?.ready.then(() => indicators.forEach(place));
   }
   initTocSpy();
 </script>

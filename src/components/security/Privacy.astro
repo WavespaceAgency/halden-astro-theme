@@ -30,7 +30,8 @@ const lines = (text: string) => text.split("\n");
       <!-- Tabs + text + illustration -->
       <div class="mt-12 flex flex-col gap-12 lg:mt-0 lg:flex-row lg:items-center lg:gap-10 lg:pt-[88px]">
         <div class="flex flex-col gap-10 lg:h-[450px] lg:w-[334px] lg:shrink-0 lg:gap-[75px]">
-          <div role="tablist" aria-label={p.tabsLabel} class="-ml-px flex flex-col gap-0.5 lg:w-[321px]" data-tabs>
+          <div role="tablist" aria-label={p.tabsLabel} class="relative -ml-px flex flex-col gap-0.5 lg:w-[321px]" data-tabs>
+            <span class="privacy-indicator" data-indicator aria-hidden="true" />
             {
               p.steps.map((step, i) => (
                 <button
@@ -60,8 +61,8 @@ const lines = (text: string) => text.split("\n");
                   data-active={i === 0 ? "" : undefined}
                 >
                   <div class="flex flex-col gap-[11px]">
-                    <h3 class="text-h3 font-medium text-canvas">{lines(step.title).map((line, j) => (j ? [" ", <br />, line] : line))}</h3>
-                    <p class="max-w-[321px] text-base leading-[26px] text-canvas">{step.text}</p>
+                    <h3 class="text-h3 font-medium text-canvas" data-split="chars">{lines(step.title).map((line, j) => (j ? [" ", <br />, line] : line))}</h3>
+                    <p class="max-w-[321px] text-base leading-[26px] text-canvas" data-split="words">{step.text}</p>
                   </div>
                   <a href={p.cta.href} class={buttonClasses({ variant: "light", className: "bg-canvas focus-visible:outline-canvas" })}>
                     {p.cta.label}
@@ -73,12 +74,12 @@ const lines = (text: string) => text.split("\n");
         </div>
 
         <!-- Illustration: glass fan + status card (scaled down on small screens) -->
-        <div class="privacy-art relative lg:h-[380px] lg:flex-1" aria-hidden="true">
+        <div class="privacy-art relative lg:h-[380px] lg:flex-1" aria-hidden="true" data-no-draw data-art>
           <div class="absolute top-0 left-1/2 h-[380px] w-[600px] origin-top lg:w-[560px] -translate-x-1/2 scale-(--s)">
             <div class="absolute inset-x-0 top-[104px] h-[276px] overflow-hidden">
-              {blades.map((deg) => <span class="privacy-blade" style={`--r:${deg}deg`} />)}
+              {blades.map((deg, i) => <span class="privacy-blade" style={`--r:${deg}deg;--bd:${(Math.abs(i - 7) * 0.035).toFixed(3)}s`} data-blade={deg} />)}
             </div>
-            <span class="privacy-stem absolute top-[104px] left-[279px] h-[270px] w-0.5"></span>
+            <span class="privacy-stem absolute top-[104px] left-[279px] h-[270px] w-0.5" data-stem></span>
 
             <div class="absolute top-0 left-[308px] grid w-[292px]">
               {
@@ -91,21 +92,21 @@ const lines = (text: string) => text.split("\n");
                     <div class="flex items-center justify-between">
                       <p class="flex items-center gap-2.5">
                         <span class="h-6 w-[3px] bg-brand-bright" />
-                        <span class="text-h4 leading-6 font-medium tracking-[-0.015em] text-ink">{step.card.title}</span>
+                        <span class="pc-anim text-h4 leading-6 font-medium tracking-[-0.015em] text-ink" style="--dl:.14s;--dur:.45s">{step.card.title}</span>
                       </p>
-                      {step.card.number && <span class="text-[11px] font-medium text-muted">{step.card.number}</span>}
+                      {step.card.number && <span class="pc-anim text-[11px] font-medium text-muted" style="--dl:.2s;--dur:.4s">{step.card.number}</span>}
                     </div>
                     <ul class="flex flex-col gap-1.5 pt-3.5">
-                      {step.card.rows.map((row) => (
-                        <li class="flex h-9 items-center justify-between gap-3 rounded-lg bg-canvas-2 px-2.5">
-                          <span class="flex items-center gap-2 text-[13px] leading-[17px] text-ink">
-                            <svg class="size-[18px] shrink-0" viewBox="0 0 18 18" fill="none">
+                      {step.card.rows.map((row, r) => (
+                        <li class="pc-row flex h-9 items-center justify-between gap-3 rounded-lg bg-canvas-2 px-2.5">
+                          <span class="pc-anim flex items-center gap-2 text-[13px] leading-[17px] text-ink" style={`--dl:${0.22 + r * 0.09}s;--dur:.5s`}>
+                            <svg class="size-[18px] shrink-0" viewBox="0 0 18 18" fill="none" data-no-draw>
                               <circle cx="9" cy="9" r="9" fill="#6bb1ff" />
                               <path d="M6.083 9.208 7.958 11.083 11.917 7.125" stroke="var(--canvas)" stroke-width="1.417" />
                             </svg>
                             {row.label}
                           </span>
-                          <span class={`text-[11px] leading-[14px] font-medium tracking-[0.02em] ${statusColor[row.tone]}`}>{row.status}</span>
+                          <span class={`pc-anim text-[11px] leading-[14px] font-medium tracking-[0.02em] ${statusColor[row.tone]}`} style={`--dl:${0.48 + r * 0.09}s;--dur:.35s`}>{row.status}</span>
                         </li>
                       ))}
                     </ul>
@@ -152,18 +153,37 @@ const lines = (text: string) => text.split("\n");
     color: var(--canvas);
   }
   .privacy-tab[aria-selected="true"] {
-    border-color: var(--canvas);
     color: var(--canvas);
+  }
+  /* Active tab indicator: one bar that slides between the tabs (position set by the script;
+     the default sits on the first tab, so it is right without JS too). */
+  .privacy-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: var(--h, 44px);
+    background: var(--canvas);
+    transform: translateY(var(--y, 0px));
+    transition:
+      transform 0.55s cubic-bezier(0.34, 1.3, 0.64, 1),
+      height 0.35s ease;
+  }
+  @media (min-width: 1024px) {
+    .privacy-indicator {
+      height: var(--h, 36px);
+    }
   }
 
   /* Panels and cards: the active one fades up 8px (Framer). All of them share one grid cell,
      so the height never jumps; hidden ones are invisible to screen readers and keyboard too. */
+  /* Framer: the old step fades out in 0.2s, the new one fades in over 0.45s after 0.08s. */
   .privacy-panel,
   .privacy-card {
     transition:
-      opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-      visibility 0s linear 0.45s;
+      opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0.2s;
   }
   .privacy-panel:not([data-active]),
   .privacy-card:not([data-active]) {
@@ -174,7 +194,34 @@ const lines = (text: string) => text.split("\n");
   }
   .privacy-panel[data-active],
   .privacy-card[data-active] {
+    transition-duration: 0.45s, 0.45s, 0s;
     transition-delay: 0.08s, 0.08s, 0s;
+  }
+
+  /* Card contents (title, number, rows, statuses) fade in one after another – on first view
+     and on every tab switch (Framer delays). */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) [data-privacy]:not([data-seen]) .pc-anim {
+      opacity: 0;
+    }
+    [data-privacy][data-seen] .privacy-card[data-active] .pc-anim {
+      animation: pc-in var(--dur) cubic-bezier(0.22, 1, 0.36, 1) var(--dl) both;
+    }
+  }
+  @keyframes pc-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+  .pc-row {
+    transition: background-color 0.25s ease, translate 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (hover: hover) {
+    .pc-row:hover {
+      background-color: var(--sky-tint);
+      translate: 2px 0;
+    }
   }
 
   /* Illustration scale */
@@ -211,18 +258,66 @@ const lines = (text: string) => text.split("\n");
     transform-origin: 50% 100%;
     transform: rotate(var(--r));
   }
+  /* Glow layer of each blade (lit up near the pointer). */
+  .privacy-blade::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid #fff;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.22), rgb(200 222 251 / 0.4));
+    opacity: var(--near, 0);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    /* The fan unfolds from the centre when it scrolls into view, then leans a little
+       towards the pointer and lifts the blades closest to it (set by the script). */
+    .privacy-blade {
+      transform: rotate(calc(var(--r) * var(--spread, 1) + var(--tilt, 0deg))) translateY(calc(var(--near, 0) * -8px));
+      transition:
+        transform 1.3s cubic-bezier(0.34, 1.25, 0.64, 1) var(--bd),
+        opacity 0.6s ease-out var(--bd);
+    }
+    :global(html.js) [data-art]:not([data-seen]) .privacy-blade {
+      --spread: 0;
+      opacity: 0;
+    }
+    [data-art][data-live] .privacy-blade {
+      transition: transform 0.25s linear;
+    }
+    :global(html.js) [data-art]:not([data-seen]) .privacy-stem {
+      transform: scaleY(0);
+    }
+    .privacy-stem {
+      transform-origin: 50% 100%;
+      transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  }
   .privacy-stem {
     background: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(200 222 251 / 0.28));
   }
 </style>
 
 <script>
+  import { reduceMotion } from "@/scripts/motion";
+
   document.querySelectorAll<HTMLElement>("[data-privacy]").forEach((root) => {
     const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
     const panels = Array.from(root.querySelectorAll<HTMLElement>('[role="tabpanel"]'));
     const cards = Array.from(root.querySelectorAll<HTMLElement>("[data-card]"));
+    const indicator = root.querySelector<HTMLElement>("[data-indicator]");
+    const art = root.querySelector<HTMLElement>("[data-art]");
+    let current = 0;
+
+    /** Slide the indicator bar onto the selected tab. */
+    const place = () => {
+      const tab = tabs[current];
+      if (!indicator || !tab) return;
+      indicator.style.setProperty("--y", `${tab.offsetTop}px`);
+      indicator.style.setProperty("--h", `${tab.offsetHeight}px`);
+    };
 
     const select = (index: number, focus = false) => {
+      current = index;
       tabs.forEach((tab, i) => {
         const on = i === index;
         tab.setAttribute("aria-selected", String(on));
@@ -230,6 +325,7 @@ const lines = (text: string) => text.split("\n");
         panels[i].toggleAttribute("data-active", on);
         cards[i]?.toggleAttribute("data-active", on);
       });
+      place();
       if (focus) tabs[index].focus();
     };
 
@@ -242,6 +338,69 @@ const lines = (text: string) => text.split("\n");
         e.preventDefault();
         select((next + tabs.length) % tabs.length, true);
       });
+    });
+    place();
+    new ResizeObserver(place).observe(tabs[0].parentElement!);
+
+    // First view: the card rows play in and the glass fan unfolds (then the pointer may move it).
+    let live = false;
+    const reveal = () => {
+      root.setAttribute("data-seen", "");
+      art?.setAttribute("data-seen", "");
+      setTimeout(() => {
+        live = true;
+        art?.setAttribute("data-live", "");
+      }, 1700);
+    };
+    if (reduceMotion() || !("IntersectionObserver" in window)) reveal();
+    else {
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((e) => e.isIntersecting)) return;
+          io.disconnect();
+          reveal();
+        },
+        { threshold: 0.35 },
+      );
+      io.observe(art ?? root);
+    }
+
+    // Glass fan follows the pointer (desktop, motion allowed): it leans a few degrees and the
+    // blades nearest the pointer's angle lift and light up. Eased in rAF, idle when still.
+    if (!art || reduceMotion() || !matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    const blades = Array.from(art.querySelectorAll<HTMLElement>("[data-blade]")).map((el) => ({ el, deg: Number(el.dataset.blade), near: 0 }));
+    const stem = art.querySelector<HTMLElement>("[data-stem]");
+    let targetAngle = 0, targetTilt = 0, tilt = 0, strength = 0, targetStrength = 0, raf = 0;
+    const step = () => {
+      tilt += (targetTilt - tilt) * 0.08;
+      strength += (targetStrength - strength) * 0.08;
+      art.style.setProperty("--tilt", `${tilt.toFixed(3)}deg`);
+      let moving = Math.abs(targetTilt - tilt) > 0.01 || Math.abs(targetStrength - strength) > 0.005;
+      for (const b of blades) {
+        const goal = Math.max(0, 1 - Math.abs(b.deg - targetAngle) / 30) * strength;
+        b.near += (goal - b.near) * 0.12;
+        if (Math.abs(goal - b.near) > 0.003) moving = true;
+        b.el.style.setProperty("--near", b.near.toFixed(3));
+      }
+      raf = moving ? requestAnimationFrame(step) : 0;
+    };
+    const kick = () => {
+      if (!raf) raf = requestAnimationFrame(step);
+    };
+    root.addEventListener("pointermove", (e) => {
+      if (!live || !stem) return;
+      const r = stem.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width / 2);
+      const dy = r.bottom - e.clientY;
+      targetAngle = Math.max(-90, Math.min(90, (Math.atan2(dx, Math.max(dy, 1)) * 180) / Math.PI));
+      targetTilt = Math.max(-1, Math.min(1, dx / 700)) * 4;
+      targetStrength = Math.hypot(dx, dy) < 560 ? 1 : 0.35;
+      kick();
+    });
+    root.addEventListener("pointerleave", () => {
+      targetTilt = 0;
+      targetStrength = 0;
+      kick();
     });
   });
 </script>

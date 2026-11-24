@@ -27,14 +27,14 @@ const image = {
 }[variant];
 ---
 
-<article class={cn("group relative flex flex-col", className)} {...attrs}>
-  <div class={cn("overflow-hidden bg-canvas-2", image)}>
+<article class={cn("post-card group relative flex flex-col", className)} {...attrs}>
+  <div class={cn("post-card-cover overflow-hidden bg-canvas-2", image)}>
     <Image
       src={data.image}
       alt={data.imageAlt}
       widths={[400, 600, 800]}
       sizes="(min-width: 1280px) 400px, (min-width: 768px) 50vw, 100vw"
-      class="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+      class="post-card-img size-full object-cover"
       loading={eager ? "eager" : "lazy"}
       fetchpriority={eager ? "high" : undefined}
     />
@@ -43,7 +43,7 @@ const image = {
     <PostMeta post={post} />
     <div class="flex flex-col gap-[7px]">
       <Heading class="text-[22px] leading-[1.22] font-medium tracking-[-0.015em] text-pretty text-ink-2 sm:text-2xl">
-        <a href={`/blog/${post.id}`} class="rounded-sm after:absolute after:inset-0 after:content-['']">
+        <a href={`/blog/${post.id}`} class="post-card-link rounded-sm after:absolute after:inset-0 after:content-[''] focus-visible:outline-none">
           <span data-split={splitTitle ? "chars" : undefined}>{data.title}</span>
         </a>
       </Heading>
@@ -51,3 +51,66 @@ const image = {
     </div>
   </div>
 </article>
+
+<style>
+  /* Hover (pointer devices) and keyboard focus: the card lifts 4px, the cover gets a soft
+     shadow and zooms to 1.03 inside its rounded frame, the title turns brand blue. */
+  .post-card {
+    transition: translate 0.5s cubic-bezier(0.34, 1.45, 0.64, 1);
+  }
+  .post-card-cover {
+    transition: box-shadow 0.45s ease;
+    /* keeps the rounded corners clipping the zoomed image in Safari */
+    isolation: isolate;
+  }
+  .post-card-img {
+    transition:
+      scale 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.3s ease;
+  }
+  .post-card :global(h2),
+  .post-card :global(h3) {
+    transition: color 0.25s ease;
+  }
+  @media (hover: hover) {
+    .post-card:hover {
+      translate: 0 -4px;
+    }
+    .post-card:hover .post-card-cover {
+      box-shadow: 0 18px 40px -12px rgb(12 26 47 / 0.22);
+    }
+    .post-card:hover .post-card-img {
+      scale: 1.03;
+    }
+    .post-card:hover :is(h2, h3) {
+      color: var(--brand);
+    }
+  }
+  .post-card:has(.post-card-link:focus-visible) {
+    translate: 0 -4px;
+  }
+  .post-card:has(.post-card-link:focus-visible) .post-card-cover {
+    box-shadow:
+      0 0 0 2px var(--canvas),
+      0 0 0 4px var(--brand);
+  }
+  .post-card:has(.post-card-link:focus-visible) .post-card-img {
+    scale: 1.03;
+  }
+  .post-card:has(.post-card-link:focus-visible) :is(h2, h3) {
+    color: var(--brand);
+  }
+  .post-card:active .post-card-img {
+    scale: 1.015;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .post-card,
+    .post-card-img {
+      transition: none;
+    }
+    .post-card:hover,
+    .post-card:has(.post-card-link:focus-visible) {
+      translate: none;
+    }
+  }
+</style>

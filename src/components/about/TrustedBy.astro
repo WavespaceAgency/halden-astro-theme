@@ -1,9 +1,13 @@
 ---
 import Container from "@/components/ui/Container.astro";
 import Eyebrow from "@/components/ui/Eyebrow.astro";
+import SplitText from "./SplitText.astro";
 import { trustedBy } from "@/config/pages/about";
 
-/** "Trusted by clinic teams" (Figma "Trusted by", 1440×468): twelve coloured name tiles. */
+/**
+ * "Trusted by clinic teams" (Figma "Trusted by", 1440×468): twelve coloured name tiles.
+ * Motion (Framer): the names un-blur word by word in view, tile after tile. Hover: the tile lifts.
+ */
 ---
 
 <section class="py-16 sm:py-24 lg:py-[120px]">
@@ -11,15 +15,32 @@ import { trustedBy } from "@/config/pages/about";
     <Eyebrow {...trustedBy.eyebrow} />
     <ul class="mt-8 grid w-full grid-cols-2 gap-4 sm:grid-cols-3 lg:mt-10 lg:grid-cols-6">
       {
-        trustedBy.clinics.map((clinic) => (
+        trustedBy.clinics.map((clinic, i) => (
           <li
-            class:list={["flex h-[72px] items-center justify-center rounded-panel px-3 text-center text-base leading-5 font-semibold tracking-[-0.01em]", clinic.dark ? "text-ink-2" : "text-body"]}
+            class:list={[
+              "clinic-tile flex h-[72px] items-center justify-center rounded-panel px-3 text-center text-base leading-5 font-semibold tracking-[-0.01em]",
+              clinic.dark ? "text-ink-2" : "text-body",
+            ]}
             style={`background:${clinic.bg}`}
           >
-            {clinic.name}
+            <SplitText as="span" text={clinic.name} delay={0.3 + (i % 6) * 0.05 + Math.floor(i / 6) * 0.08} />
           </li>
         ))
       }
     </ul>
   </Container>
 </section>
+
+<style>
+  .clinic-tile {
+    transition:
+      transform 0.45s cubic-bezier(0.34, 1.45, 0.64, 1),
+      box-shadow 0.45s ease;
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .clinic-tile:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 32px -16px rgb(12 26 47 / 0.22);
+    }
+  }
+</style>

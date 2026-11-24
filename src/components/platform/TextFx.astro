@@ -35,7 +35,7 @@
     }
     [data-fx-play] .fx-c {
       animation: fx-pop 0.7s cubic-bezier(0.33, 1, 0.68, 1) both;
-      animation-delay: calc(var(--fx-d, 0.2s) + var(--i) * 0.035s);
+      animation-delay: calc(var(--fx-d, 0.2s) + var(--i) * var(--fx-step, 0.035s));
     }
     [data-fx-play] .fx-w {
       animation: fx-blur 0.45s ease-out both;

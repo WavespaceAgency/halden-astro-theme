@@ -10,11 +10,11 @@ const c = compliance;
 <section id={c.id} class="py-20 lg:py-[120px]" aria-labelledby="compliance-title">
   <Container>
     <SectionIntro id="compliance-title" eyebrow={c.eyebrow} title={c.title} titleMuted={c.titleMuted} description={c.description} />
-    <ol class="mt-12 grid gap-4 md:grid-cols-2 lg:mt-16 lg:grid-cols-3">
+    <ol data-stagger class="mt-12 grid gap-4 md:grid-cols-2 lg:mt-16 lg:grid-cols-3">
       {
         c.items.map((item, i) => (
-          <li class="flex flex-col gap-8 rounded-[20px] bg-canvas-2 p-6 sm:p-8 lg:min-h-[240px] lg:gap-12">
-            <span class="flex size-11 items-center justify-center rounded-full bg-sky font-mono text-[11px] text-ink" aria-hidden="true">
+          <li class="lift-card flex flex-col gap-8 rounded-[20px] bg-canvas-2 p-6 sm:p-8 lg:min-h-[240px] lg:gap-12">
+            <span class="card-num flex size-11 items-center justify-center rounded-full bg-sky font-mono text-[11px] text-ink" aria-hidden="true">
               {String(i + 1).padStart(2, "0")}
             </span>
             <div class="flex flex-col gap-2">
@@ -27,3 +27,41 @@ const c = compliance;
     </ol>
   </Container>
 </section>
+
+<style>
+  /* Hover: the card lifts onto white with a soft shadow; its number fills with ink. */
+  .lift-card {
+    transition:
+      opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0s),
+      transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0s),
+      translate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 0.3s ease,
+      box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .card-num {
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease,
+      scale 0.6s cubic-bezier(0.34, 1.45, 0.64, 1);
+  }
+  @media (hover: hover) {
+    .lift-card:hover {
+      translate: 0 -4px;
+      background-color: var(--surface);
+      box-shadow: 0 2px 4px 0 rgb(50 25 4 / 0.04), 0 18px 40px -8px rgb(50 25 4 / 0.12);
+    }
+    .lift-card:hover .card-num {
+      background-color: var(--ink);
+      color: var(--sky);
+      scale: 1.08;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lift-card:hover {
+      translate: none;
+    }
+    .lift-card:hover .card-num {
+      scale: none;
+    }
+  }
+</style>

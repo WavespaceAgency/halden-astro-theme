@@ -39,19 +39,22 @@ const sections = headings.filter((h) => h.depth === 2);
             <p id="legal-contents" class="mb-4 font-mono text-xs leading-4 font-medium tracking-[0.08em] text-body uppercase">
               {legalPage.contentsTitle}
             </p>
-            <ul class="flex flex-col gap-1">
-              {sections.map((h) => (
-                <li>
-                  <a
-                    href={`#${h.slug}`}
-                    data-toc-link
-                    class="flex min-h-9 items-center rounded-[10px] px-2.5 py-2 text-[15px] leading-5 text-body transition-colors hover:bg-sky-tint/60 hover:text-ink-2 aria-[current=location]:bg-sky-tint aria-[current=location]:font-medium aria-[current=location]:text-ink-2"
-                  >
-                    {h.text}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <div class="relative">
+              <span class="contents-pill pointer-events-none absolute top-0 left-0 rounded-[10px] bg-sky-tint" aria-hidden="true" data-toc-indicator></span>
+              <ul class="relative flex flex-col gap-1">
+                {sections.map((h) => (
+                  <li>
+                    <a
+                      href={`#${h.slug}`}
+                      data-toc-link
+                      class="contents-link flex min-h-9 items-center rounded-[10px] px-2.5 py-2 text-[15px] leading-5 text-body transition-[color,background-color,translate] duration-300 hover:bg-sky-tint/60 hover:text-ink-2 aria-[current=location]:bg-sky-tint aria-[current=location]:font-medium aria-[current=location]:text-ink-2"
+                    >
+                      {h.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </nav>
         )
       }
@@ -63,3 +66,37 @@ const sections = headings.filter((h) => h.depth === 2);
   <TocSpy />
   <TextEffects />
 </BaseLayout>
+
+<style>
+  /* Sliding highlight behind the active "Contents" link (TocSpy places it). Without JS the link paints its own background. */
+  .contents-pill {
+    display: none;
+    width: var(--w, 0);
+    height: var(--h, 0);
+    translate: var(--x, 0) var(--y, 0);
+    transition:
+      translate 0.55s cubic-bezier(0.34, 1.25, 0.64, 1),
+      height 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-toc-ready] .contents-pill {
+    display: block;
+  }
+  [data-toc-ready] .contents-link[aria-current="location"] {
+    background-color: transparent;
+  }
+  @media (hover: hover) {
+    .contents-link:not([aria-current]):hover {
+      translate: 3px 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .contents-pill,
+    .contents-link {
+      transition: none;
+    }
+    .contents-link:hover {
+      translate: none !important;
+    }
+  }
+</style>

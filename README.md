@@ -21,6 +21,7 @@ Open http://localhost:4321.
 
 - **11 pages:** Home, Platform, Security, Pricing, About, Blog, Blog post, Book a demo, Privacy Policy, Terms of Service, 404
 - **Pixel-perfect** build of the Halden Figma design, fully responsive from 320px to 1920px
+- **Full-width, interactive design:** full-width header that hides on scroll, animated hero with a live flow diagram, hover effects on every card and button
 - **Smooth animations:** eased smooth scrolling, text effects, scroll reveals, count-ups, animated product mockups, icons that draw themselves and springy button hovers. All respect `prefers-reduced-motion`
 - **MDX blog** with categories, table of contents, author box, related posts and RSS
 - **Config-driven:** all text lives in `src/config/`, so components contain no hard-coded copy
@@ -33,7 +34,7 @@ Open http://localhost:4321.
 
 | I want to change… | Edit |
 | --- | --- |
-| Site name, URL, navigation, footer links, socials, main button | `src/config/site.ts` |
+| Site name, URL, navigation, footer links, socials, main button, "Live Demo" link | `src/config/site.ts` |
 | Text and data of a page | `src/config/pages/<page>.ts` |
 | Closing call-to-action band (above the footer) | `src/config/pages/shared.ts` |
 | Colours, fonts, font sizes, radii, shadows | `src/styles/global.css` (CSS variables at the top) |
@@ -78,7 +79,7 @@ Set `site` in `astro.config.mjs` (or the `SITE_URL` environment variable). It is
 
 ### Forms
 
-The newsletter and "Book a demo" forms validate in the browser and show a success message. Connect them to your own service where the code is marked `TODO` (for example Formspree, Netlify Forms or your API).
+The newsletter and "Book a demo" forms validate in the browser and show a success message. Connect them to your own service where the code is marked `TODO` (for example Formspree, Netlify Forms or your API). The demo form waits 700 ms before showing success only so the "Sending…" state is visible – delete that delay when you connect a real request.
 
 ## Project structure
 

@@ -74,6 +74,9 @@ const articleLd = {
     <Content components={blogMdx} />
   </PostBody>
   <RelatedPosts posts={related} />
-  <CtaBand />
+  <!-- Framer caps the closing CTA card at 1440px on articles (full width on the other pages). -->
+  <div class="mx-auto w-full max-w-[1440px]">
+    <CtaBand />
+  </div>
   <TextEffects />
 </BaseLayout>

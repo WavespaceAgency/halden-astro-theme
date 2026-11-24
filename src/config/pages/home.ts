@@ -29,7 +29,7 @@ export const hero = {
   description:
     "Halden is a new kind of front desk: an AI agent that answers, triages and books every patient request, then writes it straight into your clinic's systems.",
   primary: { label: "Book a demo", href: siteConfig.cta.href },
-  secondary: { label: "Live Demo", href: "/platform" },
+  secondary: siteConfig.liveDemo,
   /** Background photo (src/assets/images). */
   image: "/images/home/hero-background.png",
 

@@ -1,8 +1,9 @@
 ---
 /**
  * Framer-style text effect, split at build time (no layout shift):
- *   mode="chars"  each letter pops in (scale 0.1 → 1 with a small overshoot, 0.03s apart) – headings
- *   mode="words"  each word un-blurs and rises 12px (0.03s apart) – paragraphs
+ *   mode="chars"  each letter pops in (scale 0.1 → 1 on Framer's spring, 0.8s, 0.03s apart, 0.15s delay) – headings
+ *   mode="words"  each word un-blurs and fades in (0.7s, 0.025s apart, 0.3s delay) – paragraphs
+ * Timings and spring curves are the ones the Framer site runs (read from its WAAPI animations).
  * trigger="load" starts on page load, "view" when the element scrolls into view.
  * Screen readers get the plain text; the animated copy is aria-hidden.
  * Without JavaScript or with "reduce motion" the text is simply shown.
@@ -37,13 +38,15 @@ const {
   text,
   mode = "words",
   trigger = "view",
-  delay = 0,
-  stagger = 0.03,
+  delay,
+  stagger,
   breakClass,
   class: className,
   ...attrs
 } = Astro.props;
 
+const d = delay ?? (mode === "chars" ? 0.15 : 0.3);
+const st = stagger ?? (mode === "chars" ? 0.03 : 0.025);
 const parts: SplitPart[] = typeof text === "string" ? [{ text }] : text;
 const plain = parts.map((p) => p.text).join(" ").replace(/\s+/g, " ").trim();
 
@@ -61,7 +64,7 @@ const rendered = parts.map((part) => ({
 }));
 ---
 
-<Tag class={className} data-about-split={mode} data-trigger={trigger} style={`--d:${delay}s;--s:${stagger}s`} {...attrs}>
+<Tag class={className} data-about-split={mode} data-trigger={trigger} style={`--d:${d}s;--s:${st}s`} {...attrs}>
   <span class="sr-only">{plain}</span>
   <span aria-hidden="true">
     {
@@ -111,30 +114,27 @@ const rendered = parts.map((part) => ({
     html.js [data-about-split] .ab-w {
       opacity: 0.001;
       filter: blur(8px);
-      transform: translateY(12px);
     }
     html.js [data-about-split][data-in] .ab-c {
-      animation: ab-pop 0.55s cubic-bezier(0.33, 1, 0.68, 1) both;
+      animation: ab-pop 0.8s both;
       animation-delay: calc(var(--d) + var(--i) * var(--s));
+      /* Fallback, then Framer's spring (peaks at 1.09, settles at 1). */
+      animation-timing-function: cubic-bezier(0.34, 1.45, 0.64, 1);
+      animation-timing-function: linear(0, 0.074 3.8%, 0.244 7.6%, 0.45 11.4%, 0.649 15.2%, 0.818 19%, 0.944 22.8%, 1.028 26.6%, 1.075 30.4%, 1.094 34.2%, 1.092 38%, 1.078 41.8%, 1.06 45.6%, 1.04 49.4%, 1.023 53.2%, 1.009 57%, 1 60.8%, 0.994 64.6%, 0.992 68.4%, 0.991 72.2%, 0.992 75.9%, 0.994 79.7%, 0.996 83.5%, 0.997 87.3%, 0.999 91.1%, 1 94.9%, 1);
     }
     html.js [data-about-split][data-in] .ab-w {
-      animation: ab-blur 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: ab-blur 0.7s both;
       animation-delay: calc(var(--d) + var(--i) * var(--s));
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+      animation-timing-function: linear(0, 0.058 4.3%, 0.186 8.7%, 0.338 13%, 0.487 17.4%, 0.619 21.7%, 0.728 26.1%, 0.814 30.4%, 0.878 34.8%, 0.925 39.1%, 0.957 43.5%, 0.979 47.8%, 0.992 52.2%, 1 56.5%, 1.004 60.9%, 1.006 65.2%, 1.006 69.6%, 1.006 73.9%, 1.005 78.3%, 1.004 82.6%, 1.003 87%, 1.002 91.3%, 1);
     }
   }
   @keyframes ab-pop {
-    0% {
+    from {
       opacity: 0.001;
       transform: scale(0.1);
     }
-    45% {
-      opacity: 1;
-      transform: scale(1.08);
-    }
-    75% {
-      transform: scale(0.99);
-    }
-    100% {
+    to {
       opacity: 1;
       transform: none;
     }
@@ -143,12 +143,10 @@ const rendered = parts.map((part) => ({
     from {
       opacity: 0.001;
       filter: blur(8px);
-      transform: translateY(12px);
     }
     to {
       opacity: 1;
       filter: none;
-      transform: none;
     }
   }
 </style>
@@ -165,7 +163,7 @@ const rendered = parts.map((part) => ({
               io?.unobserve(e.target);
             }
           },
-          { rootMargin: "0px 0px -10% 0px", threshold: 0.2 },
+          { rootMargin: "0px", threshold: 0 },
         )
       : null;
   els.forEach((el) => {

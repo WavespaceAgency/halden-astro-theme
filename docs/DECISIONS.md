@@ -203,3 +203,11 @@ Route `/about`. Figma frame `372:14233` ("Final design"). Framer: /about.
 - The Geist font file is preloaded so the first paint already uses it (no re-wrap when it loads).
 - Greyed-out calendar slots in the product mockups use #656e78 instead of Figma's #a3abb3 to pass WCAG AA (4.5:1).
 - Blog hero cards use `h2` (they sit right under the page `h1`); grid cards use `h3`.
+
+## Round 2 (motion + width pass)
+- Header hides on scroll down and shows on scroll up (Framer: 320ms, ease 0.22/1/0.36/1). Footer is full width with 96px sides (as Framer); identical to Figma at 1440.
+- Hero cards (Home, Platform, Security, Pricing) span the viewport with 32px margins above 1440, like Framer. Home hero: text and flow diagram share one centred 1248px column; full diagram from 1024px, compact animated call-card visual below.
+- Section headings are 34px on phones (Framer) → 54px at 1440 (Figma).
+- "Live Demo" buttons use `siteConfig.liveDemo` (external link, new tab).
+- Every page got Framer's load/scroll timings plus extra hover interactions (card lifts, image zooms, sliding tab indicators, pointer glows). All of it is off with reduced motion.
+- Hover effects only run on devices that can hover (`@media (hover: hover)`), and keyboard focus gets the same highlight.

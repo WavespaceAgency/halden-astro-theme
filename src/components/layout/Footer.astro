@@ -8,8 +8,8 @@ const linkClass = "flex w-fit min-h-11 items-center text-[17px] leading-[22px] t
 ---
 
 <footer class="relative overflow-hidden bg-surface">
-  <!-- Link columns: 5 × 224px, 32px gap at 1440 -->
-  <div class="mx-auto max-w-[90rem] px-4 pt-16 sm:px-6 lg:px-12 lg:pt-[104px] xl:px-24">
+  <!-- Link columns: full width with 96px sides (as Framer); 5 × 224px, 32px gap at 1440 -->
+  <div class="px-4 pt-16 sm:px-6 lg:px-12 lg:pt-[104px] xl:px-24">
     <nav aria-label="Footer" class="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
       {
         columns.map((col) => (
@@ -46,7 +46,7 @@ const linkClass = "flex w-fit min-h-11 items-center text-[17px] leading-[22px] t
     </div>
 
     <div
-      class="absolute inset-x-0 bottom-0 mx-auto flex max-w-[90rem] flex-col items-start gap-3 px-4 pt-6 pb-7 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-12 xl:px-24"
+      class="absolute inset-x-0 bottom-0 flex flex-col items-start gap-3 px-4 pt-6 pb-7 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-12 xl:px-24"
     >
       <p class="text-sm text-ink-2">{copyright}</p>
       <ul class="flex flex-wrap items-center gap-x-6 md:absolute md:left-1/2 md:-translate-x-1/2">

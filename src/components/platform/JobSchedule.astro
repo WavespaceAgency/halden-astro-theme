@@ -33,7 +33,7 @@ type Slot = keyof typeof slotClass;
             {s.times.map((time, t) => (
               <span
                 class:list={[
-                  "flex h-7 items-center rounded-[6px] px-2 font-mono text-[11px] leading-[13px] font-medium",
+                  "hiw-slot flex h-7 items-center rounded-[6px] px-2 font-mono text-[11px] leading-[13px] font-medium",
                   slotClass[(s.slots[d]?.[t] ?? "-") as Slot],
                 ]}
               >

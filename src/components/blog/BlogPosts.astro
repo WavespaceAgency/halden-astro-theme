@@ -18,14 +18,15 @@ const [all, ...categories] = b.categories;
 <section class="bg-canvas pt-12 pb-20 lg:pt-16 lg:pb-[120px]" data-blog-posts data-page-size={b.pageSize}>
   <Container class="flex flex-col gap-12">
     <div class="flex flex-col gap-8">
-      <div class="flex flex-wrap gap-2" role="group" aria-label={b.filterLabel}>
+      <div class="filter-chips relative flex flex-wrap gap-2" role="group" aria-label={b.filterLabel} data-filter-group>
+        <span class="filter-indicator pointer-events-none absolute top-0 left-0 rounded-pill bg-brand-bright" aria-hidden="true" data-filter-indicator></span>
         {
           [all, ...categories].map((category, i) => (
             <button
               type="button"
               aria-pressed={i === 0 ? "true" : "false"}
               data-filter={i === 0 ? "" : category}
-              class="min-h-[42px] rounded-pill border border-line px-[18px] text-[15px] leading-5 font-medium text-body transition-colors hover:border-ink/30 hover:text-ink aria-pressed:border-brand-bright aria-pressed:bg-brand-bright aria-pressed:text-white"
+              class="filter-chip relative min-h-[42px] rounded-pill border border-line px-[18px] text-[15px] leading-5 font-medium text-body transition-[color,border-color,background-color,scale] duration-300 hover:border-ink/30 hover:text-ink active:scale-[0.96] aria-pressed:border-brand-bright aria-pressed:bg-brand-bright aria-pressed:text-white"
             >
               {category}
             </button>
@@ -56,55 +57,155 @@ const [all, ...categories] = b.categories;
   </Container>
 </section>
 
+<style>
+  /* Sliding "active" pill behind the filter chips. Without JS the pressed chip paints itself. */
+  .filter-indicator {
+    display: none;
+    width: var(--w, 0);
+    height: var(--h, 0);
+    translate: var(--x, 0) var(--y, 0);
+    transition:
+      translate 0.55s cubic-bezier(0.34, 1.3, 0.64, 1),
+      width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-indicator-ready] .filter-indicator {
+    display: block;
+  }
+  [data-indicator-ready] .filter-chip[aria-pressed="true"] {
+    background-color: transparent;
+    border-color: transparent;
+  }
+  [data-indicator-still] .filter-indicator {
+    transition: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .filter-indicator {
+      transition: none;
+    }
+  }
+</style>
+
 <script>
   import { reduceMotion } from "@/scripts/motion";
 
+  const SPRING = "cubic-bezier(0.34, 1.3, 0.64, 1)";
+  const OUT = "cubic-bezier(0.22, 1, 0.36, 1)";
+
   document.querySelectorAll<HTMLElement>("[data-blog-posts]").forEach((section) => {
     const pageSize = Number(section.dataset.pageSize) || 6;
+    const group = section.querySelector<HTMLElement>("[data-filter-group]")!;
+    const indicator = section.querySelector<HTMLElement>("[data-filter-indicator]")!;
     const buttons = Array.from(section.querySelectorAll<HTMLButtonElement>("[data-filter]"));
-    const items = Array.from(section.querySelectorAll<HTMLLIElement>("[data-posts-grid] > li"));
+    const grid = section.querySelector<HTMLElement>("[data-posts-grid]")!;
+    const items = Array.from(grid.querySelectorAll<HTMLLIElement>(":scope > li"));
     const moreWrap = section.querySelector<HTMLElement>("[data-load-more-wrap]")!;
     const more = section.querySelector<HTMLButtonElement>("[data-load-more]")!;
     const empty = section.querySelector<HTMLElement>("[data-posts-empty]")!;
     let filter = "";
     let shown = pageSize;
+    let run = 0;
 
-    function render(animateFrom = 0) {
+    /** Move the pill under the pressed chip (works when the chips wrap onto two rows too). */
+    function placeIndicator(animate: boolean) {
+      const active = buttons.find((b) => b.getAttribute("aria-pressed") === "true");
+      if (!active) return;
+      if (!animate) group.setAttribute("data-indicator-still", "");
+      indicator.style.setProperty("--x", `${active.offsetLeft}px`);
+      indicator.style.setProperty("--y", `${active.offsetTop}px`);
+      indicator.style.setProperty("--w", `${active.offsetWidth}px`);
+      indicator.style.setProperty("--h", `${active.offsetHeight}px`);
+      if (!animate) requestAnimationFrame(() => requestAnimationFrame(() => group.removeAttribute("data-indicator-still")));
+    }
+
+    const matchingItems = () =>
       // "All" leaves out the featured posts (already in the hero); a category shows all its posts.
-      const matching = items.filter((li) => (filter ? li.dataset.category === filter : !("featured" in li.dataset)));
-      items.forEach((li) => (li.hidden = true));
-      matching.slice(0, shown).forEach((li, i) => {
-        li.hidden = false;
-        if (i >= animateFrom && !reduceMotion()) {
-          li.animate(
-            [
-              { opacity: 0, transform: "translateY(24px)" },
-              { opacity: 1, transform: "none" },
-            ],
-            { duration: 600, delay: (i - animateFrom) * 80, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "backwards" },
-          );
-        }
-      });
+      items.filter((li) => (filter ? li.dataset.category === filter : !("featured" in li.dataset)));
+
+    function show(list: HTMLLIElement[]) {
+      items.forEach((li) => (li.hidden = !list.includes(li)));
+    }
+
+    function updateChrome(matching: HTMLLIElement[]) {
       moreWrap.hidden = matching.length <= shown;
       empty.classList.toggle("hidden", matching.length > 0);
     }
 
+    function enter(list: HTMLLIElement[], from = 0) {
+      list.slice(from).forEach((li, i) =>
+        li.animate(
+          [
+            { opacity: 0, transform: "translateY(28px) scale(0.97)" },
+            { opacity: 1, transform: "none" },
+          ],
+          { duration: 700, delay: i * 70, easing: SPRING, fill: "backwards" },
+        ),
+      );
+    }
+
+    /** Filter change: the old cards fade out, the grid eases to its new height, the new cards rise in one by one. */
+    async function applyFilter() {
+      const token = ++run;
+      shown = pageSize;
+      const matching = matchingItems();
+      const next = matching.slice(0, shown);
+      if (reduceMotion()) {
+        show(next);
+        updateChrome(matching);
+        return;
+      }
+      grid.getAnimations().forEach((a) => a.cancel());
+      const current = items.filter((li) => !li.hidden);
+      const startHeight = grid.offsetHeight;
+      await Promise.all(
+        current.map((li) => {
+          li.getAnimations().forEach((a) => a.cancel());
+          return li
+            .animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-8px) scale(0.98)" }], {
+              duration: 180,
+              easing: "ease-in",
+              fill: "forwards",
+            })
+            .finished.catch(() => undefined);
+        }),
+      );
+      if (token !== run) return;
+      current.forEach((li) => li.getAnimations().forEach((a) => a.cancel()));
+      show(next);
+      updateChrome(matching);
+      const endHeight = grid.offsetHeight;
+      if (startHeight !== endHeight) {
+        grid.animate([{ height: `${startHeight}px` }, { height: `${endHeight}px` }], { duration: 520, easing: OUT });
+      }
+      enter(next);
+    }
+
     buttons.forEach((button) => {
       button.addEventListener("click", () => {
+        if (button.getAttribute("aria-pressed") === "true") return;
         buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+        placeIndicator(!reduceMotion());
         filter = button.dataset.filter ?? "";
-        shown = pageSize;
-        render(0);
+        void applyFilter();
       });
     });
+
     more.addEventListener("click", () => {
       const before = shown;
       shown += pageSize;
-      render(before);
+      const matching = matchingItems();
+      show(matching.slice(0, shown));
+      updateChrome(matching);
+      if (!reduceMotion()) enter(matching.slice(0, shown), before);
       // Move focus to the first new post so keyboard users continue from there.
-      const visible = items.filter((li) => !li.hidden);
-      visible[before]?.querySelector("a")?.focus({ preventScroll: true });
+      matching[before]?.querySelector("a")?.focus({ preventScroll: true });
     });
-    render(Number.POSITIVE_INFINITY);
+
+    const initial = matchingItems();
+    show(initial.slice(0, shown));
+    updateChrome(initial);
+    group.setAttribute("data-indicator-ready", "");
+    placeIndicator(false);
+    new ResizeObserver(() => placeIndicator(false)).observe(group);
   });
 </script>

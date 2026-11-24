@@ -16,7 +16,11 @@ const { post, url, headings } = Astro.props;
 const { tags } = post.data;
 ---
 
-<section class="pt-10 pb-16 lg:pt-20 lg:pb-24">
+<div class="reading-progress pointer-events-none fixed inset-x-0 top-0 z-50 h-[3px]" hidden aria-hidden="true" data-reading-progress>
+  <div class="reading-progress-bar size-full origin-left bg-linear-to-r from-brand to-[#7baff9]"></div>
+</div>
+
+<section class="pt-10 pb-16 lg:pt-20 lg:pb-24" data-post-body>
   <Container class="flex flex-col gap-10 lg:flex-row lg:gap-24">
     <PostAside post={post} url={url} headings={headings} />
     <div class="flex min-w-0 flex-col gap-6 lg:w-[760px]">
@@ -37,3 +41,41 @@ const { tags } = post.data;
   </Container>
   <TocSpy />
 </section>
+
+<script>
+  // Reading progress: a thin brand bar at the top of the window fills while you read the article.
+  const bar = document.querySelector<HTMLElement>("[data-reading-progress]");
+  const body = document.querySelector<HTMLElement>("[data-post-body]");
+  if (bar && body) {
+    const fill = bar.firstElementChild as HTMLElement;
+    bar.hidden = false;
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const r = body.getBoundingClientRect();
+      const total = r.height - window.innerHeight * 0.6;
+      const p = Math.min(1, Math.max(0, -r.top / Math.max(1, total)));
+      fill.style.transform = `scaleX(${p})`;
+      bar.style.opacity = p > 0 ? "1" : "0";
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    update();
+  }
+</script>
+
+<style>
+  .reading-progress {
+    transition: opacity 0.4s ease;
+  }
+  .reading-progress-bar {
+    transform: scaleX(0);
+    box-shadow: 0 0 12px rgb(44 103 246 / 0.45);
+  }
+</style>
