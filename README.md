@@ -4,7 +4,7 @@ A free, open-source Astro theme for healthcare, health-tech and AI SaaS websites
 
 ![Halden Astro theme preview](.github/preview.png)
 
-**Live demo:** https://example.com <!-- DEMO_URL -->
+**Live demo:** https://halden-astro-theme.vercel.app
 
 ## Quick start
 
