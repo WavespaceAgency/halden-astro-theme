@@ -9,6 +9,7 @@ import MobileMenu from "./MobileMenu.astro";
  * Full-width sticky header (as on the Framer build): 72px on desktop, 64px on phones,
  * logo left, links centred, button right. Below 1024px the links move into MobileMenu.
  * No backdrop-filter on the header itself: it would trap the fixed mobile menu inside it.
+ * Like Framer, it slides away while scrolling down and comes back on any scroll up (320ms).
  */
 const pathname = Astro.url.pathname;
 const { main, pages, pagesLabel } = siteConfig.nav;
@@ -16,7 +17,10 @@ const link =
   "relative flex min-h-11 items-center rounded-xl px-3 text-nav text-ink transition-colors duration-200 hover:text-brand aria-[current=page]:text-brand";
 ---
 
-<header class="sticky top-0 z-40 w-full bg-surface" data-header>
+<header
+  class="sticky top-0 z-40 w-full bg-surface transition-transform duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] data-[hidden]:-translate-y-[110%] motion-reduce:transition-none"
+  data-header
+>
   <div class="relative flex h-16 w-full items-center justify-between px-5 lg:h-[72px] lg:px-8">
     <Logo />
 
@@ -84,6 +88,23 @@ const link =
 </header>
 
 <script>
+  // Hide on scroll down, show on scroll up (Framer: translateY -110%, 320ms, ease 0.22/1/0.36/1).
+  const header = document.querySelector<HTMLElement>("[data-header]");
+  if (header) {
+    let last = window.scrollY;
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const y = window.scrollY;
+      const busy = document.documentElement.classList.contains("menu-open") || header.querySelector("[data-dropdown-panel][data-open]") || header.contains(document.activeElement);
+      if (y <= header.offsetHeight || busy) header.removeAttribute("data-hidden");
+      else if (y > last + 2) header.setAttribute("data-hidden", "");
+      else if (y < last - 2) header.removeAttribute("data-hidden");
+      last = y;
+    };
+    window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  }
+
   const root = document.querySelector<HTMLElement>("[data-dropdown]");
   const toggle = root?.querySelector<HTMLButtonElement>("[data-dropdown-toggle]");
   const panel = root?.querySelector<HTMLElement>("[data-dropdown-panel]");
