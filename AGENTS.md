@@ -8,7 +8,7 @@ Halden is a static Astro theme (marketing site for an AI front desk for clinics)
 - Tailwind CSS 4 via `@tailwindcss/vite`; design tokens in `src/styles/global.css`
 - TypeScript strict; MDX via `@astrojs/mdx`; sitemap and RSS
 - Fonts: Geist + Geist Mono (Fontsource, self-hosted)
-- Animations: CSS + small vanilla `<script>` tags. **No React or other UI framework, no animation library** – keep it that way.
+- Animations: CSS + small vanilla `<script>` tags; smooth scrolling with Lenis (`src/scripts/smooth-scroll.ts` – scroll with `scrollToY()`). **No React or other UI framework, no animation library** – keep it that way.
 
 ## Commands
 
@@ -36,7 +36,9 @@ Run `npm run check` and `npm run build` after every change.
 | Shared sections (FAQ, closing CTA band) | `src/components/sections/` |
 | Page-specific sections | `src/components/<page>/` |
 | MDX element styles | `src/components/mdx/` |
-| Scroll reveals and count-ups (data attributes) | `src/scripts/motion.ts` |
+| Scroll reveals, count-ups, icon draw-in | `src/scripts/motion.ts` |
+| Smooth scrolling (Lenis) | `src/scripts/smooth-scroll.ts` |
+| Letter / word text effects (`data-split`) | `src/components/ui/TextEffects.astro` |
 | Images (optimised) | `src/assets/images/<page>/`, looked up by path with `getImage()` from `src/lib/images.ts` |
 | Build and design decisions | `docs/DECISIONS.md` |
 

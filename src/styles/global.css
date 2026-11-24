@@ -126,7 +126,7 @@
   /* Layout */
   --container-site: 78rem; /* 1248px content (1440 frame – 96px sides) */
   --container-wide: 86rem; /* 1376px (1440 frame – 32px sides) – hero card, header */
-  --spacing-nav: 5.25rem; /* 84px header */
+  --spacing-nav: 4.5rem; /* 72px header (64px on phones) */
 
   /* Motion */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);

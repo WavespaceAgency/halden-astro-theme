@@ -10,10 +10,14 @@ Notes from turning the Halden Figma design into this Astro theme.
 ## Global
 - **Fonts:** Geist and Geist Mono (SIL OFL), self-hosted with Fontsource variable fonts. The Figma file uses the static Geist cuts; the variable font renders the giant footer wordmark about 1% narrower.
 - **No mobile or tablet frames in Figma.** Breakpoints follow the Framer build: header becomes 64px with a two-line menu button below 1024px; the full-screen mobile menu also lists every page from the "Pages" dropdown.
-- **Header:** sticky, page background with a light blur so content scrolling under it stays readable.
+- **Header:** full width at every screen size, white, sticky, 72px on desktop / 64px on phones – as on the Framer build (Figma shows an 84px header on a 1440 frame). No backdrop-filter on the header: it would trap the fixed mobile-menu layer inside the header.
+- **Mobile menu:** drops down from the header like the Framer build (bars turn into ✕, links fade in one by one, full-width dark button). Page scroll is locked while it is open.
 - **"Pages" dropdown:** not drawn open in Figma – built as a two-column panel listing every page of the template (useful for the demo).
 - **Footer links** that point to pages that are not in the design (Integrations, How it works, Contact, Trust Center, HIPAA, BAA, SOC 2, Help Centre, System Status, Accessibility) go to the closest existing page or anchor (see `src/config/site.ts`).
-- **Animations:** no animation library. Reveals use IntersectionObserver + CSS transitions (`src/scripts/motion.ts`); richer motion lives in small component scripts. Everything respects `prefers-reduced-motion` and content is visible without JavaScript.
+- **Smooth scrolling:** Lenis (MIT) eases mouse-wheel scrolling; touch scrolling stays native and it is off for reduced motion. Scripts scroll with `scrollToY()` from `src/scripts/smooth-scroll.ts`.
+- **Hover:** buttons grow to 102% with a spring (Framer value), press to 97% and their icons nudge; nav links get an underline that grows from the left; the Pages dropdown opens on hover.
+- **Icons:** every small SVG icon below the first screen draws its strokes and pops its dots in when it scrolls into view (`src/scripts/motion.ts`, opt out with `data-no-draw`).
+- **Animations:** no animation library (Lenis only handles scrolling). Reveals use IntersectionObserver + CSS transitions (`src/scripts/motion.ts`); richer motion lives in small component scripts. Everything respects `prefers-reduced-motion` and content is visible without JavaScript.
 - **Placeholder data:** `hello@halden.health` → `hello@example.com`; social links point to the platform root domains. Names, quotes, stats and clinic names are fictional demo content.
 - **URLs** match the Framer build: `/privacy-policy`, `/terms-of-service`, `/blog/<slug>`.
 

@@ -21,7 +21,7 @@ Open http://localhost:4321.
 
 - **11 pages:** Home, Platform, Security, Pricing, About, Blog, Blog post, Book a demo, Privacy Policy, Terms of Service, 404
 - **Pixel-perfect** build of the Halden Figma design, fully responsive from 320px to 1920px
-- **Smooth animations** with no animation library: scroll reveals, count-ups, animated product mockups. All respect `prefers-reduced-motion`
+- **Smooth animations:** eased smooth scrolling, text effects, scroll reveals, count-ups, animated product mockups, icons that draw themselves and springy button hovers. All respect `prefers-reduced-motion`
 - **MDX blog** with categories, table of contents, author box, related posts and RSS
 - **Config-driven:** all text lives in `src/config/`, so components contain no hard-coded copy
 - **SEO ready:** meta and Open Graph tags, canonical URLs, sitemap, robots.txt, JSON-LD (Organization, WebSite, BlogPosting, FAQPage)

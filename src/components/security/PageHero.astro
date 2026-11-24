@@ -44,7 +44,7 @@ const lines = title.split("\n");
         <p class={cn("mt-3 max-w-[574px] text-lead text-white/85", descriptionClass)} data-split="words">{description}</p>
         <a
           href={cta.href}
-          class="mt-8 inline-flex min-h-[52px] items-center justify-center rounded-[22px] bg-brand px-6 text-base leading-6 font-medium text-canvas shadow-[0_0_24px_0_rgb(44_103_246/0.45)] transition-[background-color,transform] duration-150 hover:bg-brand-hover active:scale-[0.97]"
+          class="mt-8 inline-flex min-h-[52px] items-center justify-center rounded-[22px] bg-brand px-6 text-base leading-6 font-medium text-canvas shadow-[0_0_24px_0_rgb(44_103_246/0.45)] transition-[background-color,box-shadow,scale] duration-[250ms,300ms,450ms] ease-[ease,ease,cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.02] hover:bg-brand-hover active:scale-[0.97] motion-reduce:hover:scale-100"
         >
           {cta.label}
         </a>

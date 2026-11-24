@@ -3,14 +3,18 @@ import { cn } from "./utils";
 export type ButtonVariant = "primary" | "dark" | "outline" | "glass" | "light";
 export type ButtonSize = "sm" | "md" | "lg" | "xl";
 
+/**
+ * Hover (as on the Framer build): the button grows to 102% with a soft spring, its icon nudges,
+ * and it presses in to 97% on click. Colours ease over 250ms.
+ */
 const base =
-  "inline-flex shrink-0 items-center justify-center gap-2.5 rounded-button font-medium whitespace-nowrap transition-[color,background-color,box-shadow,transform] duration-150 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:pointer-events-none disabled:opacity-50";
+  "group/btn inline-flex shrink-0 items-center justify-center gap-2.5 rounded-button font-medium whitespace-nowrap transition-[color,background-color,border-color,box-shadow,scale] duration-[250ms,250ms,250ms,300ms,450ms] ease-[ease,ease,ease,ease,cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.02] active:scale-[0.97] active:duration-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:pointer-events-none disabled:opacity-50 motion-reduce:hover:scale-100 [&_svg]:transition-[translate,scale,rotate] [&_svg]:duration-500 [&_svg]:ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:[&_svg]:scale-110";
 
 const variants: Record<ButtonVariant, string> = {
   /** Blue – main action on dark and light backgrounds (Figma "Book a demo", hero). */
-  primary: "bg-brand text-white shadow-brand hover:bg-brand-hover",
+  primary: "bg-brand text-white shadow-brand hover:bg-brand-hover hover:shadow-[0_10px_32px_0_rgb(44_103_246/0.5)]",
   /** Navy – header button. */
-  dark: "bg-ink-2 text-canvas hover:bg-ink-2/85",
+  dark: "bg-ink-2 text-canvas hover:bg-[#1b2c45] hover:shadow-[0_8px_24px_0_rgb(12_26_47/0.22)]",
   /** Thin border on light backgrounds. */
   outline: "border border-line bg-surface text-ink hover:bg-canvas-2",
   /** Frosted outline on dark backgrounds (Figma "Live Demo"). */

@@ -14,6 +14,7 @@
  *   (none)       phones/tablets: everything stacked; each step animates in when scrolled into view
  *                (with `tabsOnMobile` the tabs are used on every width instead)
  */
+import { scrollToY } from "@/scripts/smooth-scroll";
 import { reduceMotion } from "@/scripts/motion";
 
 export function initSteps(section: HTMLElement, step = 500, { tabsOnMobile = false } = {}) {
@@ -49,7 +50,7 @@ export function initSteps(section: HTMLElement, step = 500, { tabsOnMobile = fal
   };
 
   const go = (i: number, focus = false) => {
-    if (scrollMode()) window.scrollTo({ top: window.scrollY - progress() + i * step + 1, behavior: "smooth" });
+    if (scrollMode()) scrollToY(window.scrollY - progress() + i * step + 1);
     select(i, focus);
   };
 

@@ -273,6 +273,7 @@ const washes = [
 
 <script>
   import { reduceMotion } from "@/scripts/motion";
+  import { scrollToY } from "@/scripts/smooth-scroll";
 
   const section = document.querySelector<HTMLElement>("[data-hiw]");
   if (section) {
@@ -378,7 +379,7 @@ const washes = [
     const goTo = (i: number) => {
       const trackTop = track.getBoundingClientRect().top + window.scrollY - STICKY_TOP;
       const y = trackTop + ((i + 0.5) / jobs.length) * range();
-      window.scrollTo({ top: y, behavior: reduceMotion() ? "auto" : "smooth" });
+      scrollToY(y);
       setActive(i);
     };
     tabs.forEach((tab, i) => {

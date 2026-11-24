@@ -5,37 +5,35 @@ import { siteConfig } from "@/config/site";
 import { cn, isActivePath } from "@/lib/utils";
 import MobileMenu from "./MobileMenu.astro";
 
+/**
+ * Full-width sticky header (as on the Framer build): 72px on desktop, 64px on phones,
+ * logo left, links centred, button right. Below 1024px the links move into MobileMenu.
+ * No backdrop-filter on the header itself: it would trap the fixed mobile menu inside it.
+ */
 const pathname = Astro.url.pathname;
 const { main, pages, pagesLabel } = siteConfig.nav;
 const link =
-  "flex min-h-11 items-center rounded-xl px-3 text-nav text-ink transition-colors hover:bg-ink/5 aria-[current=page]:text-brand";
+  "relative flex min-h-11 items-center rounded-xl px-3 text-nav text-ink transition-colors duration-200 hover:text-brand aria-[current=page]:text-brand";
 ---
 
-<header class="sticky top-0 z-40 bg-canvas/90 backdrop-blur-md supports-[backdrop-filter]:bg-canvas/80">
-  <div class="relative mx-auto flex h-16 max-w-[90rem] items-center justify-between px-4 sm:px-6 lg:h-[84px] lg:px-8">
+<header class="sticky top-0 z-40 w-full bg-surface" data-header>
+  <div class="relative flex h-16 w-full items-center justify-between px-5 lg:h-[72px] lg:px-8">
     <Logo />
 
-    <!-- Desktop navigation (1024px and up), centred like the Figma frame -->
+    <!-- Desktop navigation (1024px and up), centred -->
     <nav aria-label="Main" class="absolute left-1/2 hidden -translate-x-1/2 lg:block">
       <ul class="flex items-center gap-1">
         <li class="relative" data-dropdown>
-          <button
-            type="button"
-            class={cn(link, "gap-1.5 text-ink-2")}
-            aria-expanded="false"
-            aria-controls="pages-menu"
-            data-dropdown-toggle
-          >
+          <button type="button" class={cn(link, "gap-1.5 text-ink-2")} aria-expanded="false" aria-controls="pages-menu" data-dropdown-toggle>
             {pagesLabel}
-            <svg class="size-3.5 transition-transform duration-200 [[aria-expanded=true]>&]:rotate-180" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+            <svg class="size-3.5 transition-transform duration-300 ease-out-expo [[aria-expanded=true]>&]:rotate-180" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
               <path d="M12.63 4.667 7 10.296 1.37 4.667l.83-.829L7 8.645l4.8-4.8.83.822Z"></path>
             </svg>
           </button>
           <div
             id="pages-menu"
-            hidden
             data-dropdown-panel
-            class="absolute top-full left-1/2 mt-2 w-[440px] -translate-x-1/2 rounded-panel border border-line bg-surface p-2 shadow-lift"
+            class="invisible absolute top-full left-1/2 mt-2 w-[440px] -translate-x-1/2 translate-y-2 scale-[0.98] rounded-panel border border-line bg-surface p-2 opacity-0 shadow-lift transition-[opacity,translate,scale,visibility] duration-300 ease-out-expo data-[open]:visible data-[open]:translate-y-0 data-[open]:scale-100 data-[open]:opacity-100"
           >
             <ul class="grid grid-cols-2 gap-0.5">
               {
@@ -44,9 +42,17 @@ const link =
                     <a
                       href={page.href}
                       aria-current={isActivePath(pathname, page.href) && page.href !== "/404" ? "page" : undefined}
-                      class="flex min-h-11 items-center rounded-chip px-3 text-[15px] text-ink transition-colors hover:bg-sky-tint aria-[current=page]:text-brand"
+                      class="group/item flex min-h-11 items-center justify-between rounded-chip px-3 text-[15px] text-ink transition-colors duration-200 hover:bg-sky-tint aria-[current=page]:text-brand"
                     >
                       {page.label}
+                      <svg
+                        class="size-3.5 -translate-x-1 text-brand opacity-0 transition-[opacity,translate] duration-300 ease-out-expo group-hover/item:translate-x-0 group-hover/item:opacity-100"
+                        viewBox="0 0 14 14"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
                     </a>
                   </li>
                 ))
@@ -57,8 +63,12 @@ const link =
         {
           main.map((item) => (
             <li>
-              <a href={item.href} class={link} aria-current={isActivePath(pathname, item.href) ? "page" : undefined}>
+              <a href={item.href} class={cn(link, "group/nav")} aria-current={isActivePath(pathname, item.href) ? "page" : undefined}>
                 {item.label}
+                <span
+                  class="absolute inset-x-3 bottom-2 h-px origin-left scale-x-0 bg-current transition-transform duration-300 ease-out-expo group-hover/nav:scale-x-100"
+                  aria-hidden="true"
+                />
               </a>
             </li>
           ))
@@ -67,7 +77,7 @@ const link =
     </nav>
 
     <div class="flex items-center gap-2">
-      <Button href={siteConfig.cta.href} variant="dark" class="hidden sm:inline-flex">{siteConfig.cta.label}</Button>
+      <div class="hidden lg:block"><Button href={siteConfig.cta.href} variant="dark">{siteConfig.cta.label}</Button></div>
       <MobileMenu />
     </div>
   </div>
@@ -81,14 +91,26 @@ const link =
   if (root && toggle && panel) {
     const setOpen = (open: boolean) => {
       toggle.setAttribute("aria-expanded", String(open));
-      panel.hidden = !open;
+      panel.toggleAttribute("data-open", open);
     };
-    toggle.addEventListener("click", () => setOpen(toggle.getAttribute("aria-expanded") !== "true"));
+    const isOpen = () => toggle.getAttribute("aria-expanded") === "true";
+    toggle.addEventListener("click", () => setOpen(!isOpen()));
+    // Open on hover for mouse users (click still works for touch and keyboard).
+    let timer: number | undefined;
+    root.addEventListener("pointerenter", (e) => {
+      if (e.pointerType !== "mouse") return;
+      window.clearTimeout(timer);
+      setOpen(true);
+    });
+    root.addEventListener("pointerleave", (e) => {
+      if (e.pointerType !== "mouse") return;
+      timer = window.setTimeout(() => setOpen(false), 160);
+    });
     document.addEventListener("click", (e) => {
       if (!root.contains(e.target as Node)) setOpen(false);
     });
     root.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !panel.hidden) {
+      if (e.key === "Escape" && isOpen()) {
         setOpen(false);
         toggle.focus();
       }
